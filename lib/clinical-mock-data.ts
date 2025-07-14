@@ -472,6 +472,14 @@ export class ClinicalDataManager {
     return this.patients.find(p => p.id === id);
   }
 
+  getPatientLabResults(patientId: string): LabResult[] {
+    const patient = this.getPatient(patientId);
+    if (!patient) {
+      return [];
+    }
+    return patient.labResults;
+  }
+
   searchPatients(query: string): Patient[] {
     const lowerQuery = query.toLowerCase();
     return this.patients.filter(p => 
