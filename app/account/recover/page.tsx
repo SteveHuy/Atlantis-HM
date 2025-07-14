@@ -3,33 +3,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle } from "lucide-react";
-
-const recoverySchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
-  phone: z
-    .string()
-    .optional()
-    .refine((phone) => !phone || /^[\d\s\-\+\(\)]+$/.test(phone), {
-      message: "Please enter a valid phone number",
-    }),
-}).refine((data) => data.email || data.phone, {
-  message: "Please provide either email or phone number",
-  path: ["email"],
-});
-
-type RecoveryFormData = z.infer<typeof recoverySchema>;
+import { AlertCircle, CheckCircle, Shield, KeyRound } from "lucide-react";
+import { 
+  accountRecoverySchema, 
+  type AccountRecoveryData 
+} from "@/lib/epic3-validation";
+import { mockDataManager } from "@/lib/epic3-mock-data";
 
 export default function AccountRecovery() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,55 +26,64 @@ export default function AccountRecovery() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<RecoveryFormData>({
-    resolver: zodResolver(recoverySchema),
+  } = useForm<AccountRecoveryData>({
+    resolver: zodResolver(accountRecoverySchema),
   });
 
-  const onSubmit = async (data: RecoveryFormData) => {
+  const onSubmit = async (data: AccountRecoveryData) => {
     setIsLoading(true);
     setRecoveryError("");
     setRecoverySuccess("");
 
     try {
       // Mock API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Mock validation - check against registered accounts
-      const validEmails = ["patient@example.com", "user@demo.com"];
-      const validPhones = ["+1234567890", "555-0123"];
+      // Check against registered patient accounts
+      const patients = mockDataManager.getPatients();
+      let matchedPatient = null;
 
-      const emailMatches = data.email && validEmails.includes(data.email);
-      const phoneMatches = data.phone && validPhones.some(p => 
-        data.phone?.replace(/\D/g, '').includes(p.replace(/\D/g, ''))
-      );
+      // Match by email (required field)
+      matchedPatient = patients.find(p => p.email === data.email);
 
-      if (!emailMatches && !phoneMatches) {
-        setRecoveryError("Provided details do not match our records");
+      // Also check phone if provided
+      if (!matchedPatient && data.phone) {
+        matchedPatient = patients.find(p => p.phone === data.phone);
+      }
+
+      if (!matchedPatient) {
+        setRecoveryError("No account found with the provided email address. Please check your email and try again.");
         return;
       }
 
-      // Mock password reset process
-      console.log("Generating password reset token with 15-minute expiry");
-      console.log("Sending password reset link/code to:", data.email || data.phone);
+      // Generate OAuth token with 15-minute expiry
+      const resetToken = `reset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const expiryTime = new Date(Date.now() + 15 * 60000); // 15 minutes
 
-      // Mock OAuth token creation (would be handled by backend)
-      const mockToken = `reset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      console.log("OAuth reset token created:", mockToken);
+      // Log password reset attempt
+      mockDataManager.addAuditLogEntry({
+        userId: matchedPatient.id,
+        userRole: 'patient',
+        action: 'PASSWORD_RESET_REQUEST',
+        details: `Password reset requested for email: ${data.email}`
+      });
 
-      // Simulate secure API communication
-      console.log("Using HTTPS for secure API communication");
-      console.log("Token expires in 15 minutes");
+      // Simulate secure password reset API & OAuth token creation
+      console.log("Password reset process initiated:");
+      console.log("- OAuth reset token created:", resetToken);
+      console.log("- Token expires at:", expiryTime.toISOString());
+      console.log("- Using HTTPS for secure communication");
+      console.log("- Reset link/code sent to:", data.email);
 
       setRecoverySuccess(
-        `A reset link has been sent to your provided contact${
-          data.email ? ` (${data.email})` : data.phone ? ` (${data.phone})` : ""
-        }. Please check your ${data.email ? "email" : "messages"} and follow the instructions to reset your password. This link will expire in 15 minutes.`
+        `A password reset link has been sent to ${data.email}. Please check your email and follow the instructions to reset your password. This link will expire in 15 minutes for security purposes.`
       );
 
       // Clear form
       reset();
 
-    } catch {
+    } catch (error) {
+      console.error("Recovery error:", error);
       setRecoveryError("An error occurred while processing your request. Please try again.");
     } finally {
       setIsLoading(false);
@@ -97,132 +91,138 @@ export default function AccountRecovery() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Link href="/">
-            <Image
-              src="/atlantis-logo.svg"
-              alt="Atlantis HMS Logo"
-              width={150}
-              height={40}
-              priority
-            />
-          </Link>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-blue-600">Atlantis HMS</h1>
+          <p className="mt-2 text-gray-600">Healthcare Management System</p>
         </div>
-        <h1 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Account Recovery
-        </h1>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Enter your email or phone number to reset your password
-        </p>
-      </div>
-
-      {/* Recovery Form */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card className="py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address *
-              </Label>
-              <div className="mt-1">
-                <Input
-                  id="email"
-                  type="email"
-                  {...register("email")}
-                  className={`block w-full ${
-                    errors.email ? "border-red-300 focus:border-red-500 focus:ring-red-500" : ""
-                  }`}
-                  aria-describedby={errors.email ? "email-error" : "email-help"}
-                  placeholder="Enter your registered email address"
-                />
-                <p id="email-help" className="mt-2 text-xs text-gray-500">
-                  This must match the email address associated with your account
-                </p>
-                {errors.email && (
-                  <p id="email-error" className="mt-2 text-sm text-red-600" role="alert">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Phone Field */}
-            <div>
-              <Label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number (Optional)
-              </Label>
-              <div className="mt-1">
-                <Input
-                  id="phone"
-                  type="tel"
-                  {...register("phone")}
-                  className={`block w-full ${
-                    errors.phone ? "border-red-300 focus:border-red-500 focus:ring-red-500" : ""
-                  }`}
-                  aria-describedby={errors.phone ? "phone-error" : "phone-help"}
-                  placeholder="Enter your registered phone number"
-                />
-                <p id="phone-help" className="mt-2 text-xs text-gray-500">
-                  Alternative recovery method if email is not accessible
-                </p>
-                {errors.phone && (
-                  <p id="phone-error" className="mt-2 text-sm text-red-600" role="alert">
-                    {errors.phone.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
+              <KeyRound className="h-6 w-6 text-blue-600" />
+              Account Recovery
+            </CardTitle>
+            <CardDescription className="text-center">
+              Enter your email address to reset your password
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             {/* Success Message */}
             {recoverySuccess && (
-              <Alert className="border-green-200 bg-green-50">
+              <Alert className="mb-6 border-green-200 bg-green-50">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
                   {recoverySuccess}
                 </AlertDescription>
               </Alert>
             )}
-
+            
             {/* Error Message */}
             {recoveryError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{recoveryError}</AlertDescription>
+              <Alert className="mb-6 border-red-200 bg-red-50">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">
+                  {recoveryError}
+                </AlertDescription>
               </Alert>
             )}
 
-            {/* Submit Button */}
-            <div>
-              <Button
-                type="submit"
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email")}
+                  className={errors.email ? 'border-red-500' : ''}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  placeholder="Enter your registered email address"
+                />
+                {errors.email && (
+                  <p id="email-error" className="text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">
+                  This must match the email address associated with your account
+                </p>
+              </div>
+
+              {/* Phone Field */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number (Optional)</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  {...register("phone")}
+                  className={errors.phone ? 'border-red-500' : ''}
+                  aria-describedby={errors.phone ? "phone-error" : undefined}
+                  placeholder="(555) 123-4567"
+                />
+                {errors.phone && (
+                  <p id="phone-error" className="text-sm text-red-600">
+                    {errors.phone.message}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">
+                  Alternative recovery method if email is not accessible
+                </p>
+              </div>
+
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                className="w-full"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Processing..." : "Submit"}
+                {isLoading ? 'Sending Reset Link...' : 'Send Reset Link'}
               </Button>
+            </form>
+
+            {/* Security Notice */}
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-800 mb-2">
+                <Shield className="h-4 w-4" />
+                <span className="text-sm font-medium">Security Notice:</span>
+              </div>
+              <ul className="text-xs text-blue-700 space-y-1">
+                <li>• Reset links expire after 15 minutes for security</li>
+                <li>• OAuth tokens are created for secure password reset</li>
+                <li>• All communications use HTTPS encryption</li>
+                <li>• Reset attempts are logged for security monitoring</li>
+              </ul>
             </div>
 
-            {/* Back to Login Link */}
-            <div className="text-center">
-              <Link
-                href="/patient/login"
-                className="text-sm text-blue-600 hover:text-blue-500"
+            {/* Navigation Links */}
+            <div className="mt-6 text-center space-y-2">
+              <Link 
+                href="/patient/login" 
+                className="block text-sm text-blue-600 hover:text-blue-500"
               >
-                Back to Login
+                Back to Patient Login
+              </Link>
+              <Link 
+                href="/" 
+                className="block text-sm text-gray-600 hover:text-gray-500"
+              >
+                Return to Homepage
               </Link>
             </div>
-          </form>
 
-          {/* Demo Information */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium mb-2">Demo Recovery Details:</p>
-            <p className="text-xs text-blue-700">Email: patient@example.com or user@demo.com</p>
-            <p className="text-xs text-blue-700">Phone: +1234567890 or 555-0123</p>
-          </div>
+            {/* Demo Information */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-md">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Recovery:</h3>
+              <div className="text-xs text-gray-600 space-y-1">
+                <div><strong>Test Email:</strong> john.doe@email.com</div>
+                <div className="text-gray-500 italic">
+                  Use this email for testing the recovery process
+                </div>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </div>

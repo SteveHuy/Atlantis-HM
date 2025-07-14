@@ -232,13 +232,14 @@ export default function Home() {
                 Handle scheduling and patient intake.
               </p>
               <div className="space-y-3">
-                <Button 
-                  className="w-full bg-green-600 hover:bg-green-700" 
-                  onClick={() => alert("UD-REF: #Receptionist Login - will be implemented in future epic")}
-                  aria-label="Go to receptionist login"
-                >
-                  Receptionist Login
-                </Button>
+                <Link href="/receptionist/login">
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700" 
+                    aria-label="Go to receptionist login"
+                  >
+                    Receptionist Login
+                  </Button>
+                </Link>
               </div>
             </Card>
 
@@ -251,13 +252,14 @@ export default function Home() {
                 Access EHR and billing tools.
               </p>
               <div className="space-y-3">
-                <Button 
-                  className="w-full bg-purple-600 hover:bg-purple-700"
-                  onClick={() => alert("UD-REF: #Service Provider Login - will be implemented in future epic")}
-                  aria-label="Go to service provider login"
-                >
-                  Service Provider Login
-                </Button>
+                <Link href="/provider/login">
+                  <Button 
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    aria-label="Go to service provider login"
+                  >
+                    Service Provider Login
+                  </Button>
+                </Link>
               </div>
             </Card>
           </div>

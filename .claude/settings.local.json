@@ -5,9 +5,7 @@
       "mcp__Userdoc__getRequirement",
       "mcp__Userdoc__listTeams",
       "mcp__Userdoc__checkActiveProject",
-      "Bash(mkdir -p \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3/atlantis-hms-webapp/app/patient\")",
-      "Bash(rm -rf \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3/atlantis-hms-webapp/app/patient\")",
-      "Bash(cd \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3/atlantis-hms-webapp\")",
+      "Bash(mkdir*)",
       "Bash(npx shadcn@latest add button card input label form)",
       "Bash(mkdir -p \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3/atlantis-hms-webapp/app/patient/login\")",
       "Bash(mkdir -p \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3/atlantis-hms-webapp/app/patient/register\")",
@@ -19,7 +17,8 @@
       "Bash(cd \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3\")",
       "Bash(git add .)",
       "Bash(npx shadcn@latest add badge)",
-      "Bash(npx shadcn@latest add alert-dialog)"
+      "Bash(npx shadcn@latest add alert-dialog)",
+      "Bash(touch claude.log)"
     ],
     "deny": []
   }

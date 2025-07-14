@@ -7,7 +7,6 @@ import { dashboardLogger } from "@/lib/logger";
 export function SettingsCard() {
   const handleEmergencyContact = () => {
     dashboardLogger.logDashboardEvent('update_emergency_contact_click');
-    alert("UD-REF: #Update Emergency Contact - will be implemented in future epic");
   };
 
   return (
@@ -29,14 +28,16 @@ export function SettingsCard() {
           </Button>
         </Link>
 
-        <Button 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={handleEmergencyContact}
-        >
-          <Phone className="w-4 h-4 mr-2" />
-          Update Emergency Contact
-        </Button>
+        <Link href="/patient/emergency-contact">
+          <Button 
+            variant="outline" 
+            className="w-full justify-start"
+            onClick={handleEmergencyContact}
+          >
+            <Phone className="w-4 h-4 mr-2" />
+            Update Emergency Contact
+          </Button>
+        </Link>
       </div>
 
       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
