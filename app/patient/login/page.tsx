@@ -65,8 +65,8 @@ export default function PatientLogin() {
           }));
         }
 
-        // UD-REF: #Patient Dashboard - will be implemented in future epic
-        alert("Login successful! Patient Dashboard will be available in a future update.");
+        // Redirect to Patient Dashboard
+        window.location.href = "/patient/dashboard";
       } else {
         setLoginError("Invalid username or password");
       }

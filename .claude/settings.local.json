@@ -17,7 +17,9 @@
       "Bash(npx shadcn@latest add checkbox alert)",
       "Bash(npm run build)",
       "Bash(cd \"/Users/stevehuynh/Documents/Userdoc Documents/Atlantis-HM-v3\")",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(npx shadcn@latest add badge)",
+      "Bash(npx shadcn@latest add alert-dialog)"
     ],
     "deny": []
   }

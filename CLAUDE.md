@@ -18,7 +18,7 @@ Features ALWAYS map to a Userdoc Requirement through the "#"
 
 ## Implementation Plan vs Userdoc Requirements Resolution
 1. **If a Userdoc requirement references a feature (#Something) that is NOT mentioned in the current implementation plan:**
-    - Add a comment in the code: `UD-REF: #Something - will be implemented in future epic`
+    - MUST add a comment in the code: `UD-REF: #Something - will be implemented in future epic`
     - Implement a temporary placeholder/mock behavior for the current epic
     - Do NOT implement the missing feature
 
@@ -103,8 +103,6 @@ Please autonomously complete these tasks, ensuring you retrieve the requirements
 Make sure to make frequent git commits with descriptive messages as you go through
 
 # 🧠 Expert Full-Stack & Secure Next.js Project Guidelines
-
-This document combines architectural, coding, security, and process guidelines to help developers produce highly maintainable, secure, and performant **Next.js** applications using **TypeScript**, **Tailwind CSS**, and **modern UI/UX frameworks**.
 
 ---
 
