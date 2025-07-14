@@ -49,7 +49,7 @@ export default function ReceptionistLoginPage() {
   useEffect(() => {
     const session = sessionManager.getSession();
     if (session?.role === 'receptionist') {
-      router.push('/receptionist/dashboard'); // UD-REF: #Manage Appointment Calendar - will be implemented in future epic
+      router.push('/receptionist/dashboard');
     }
   }, [router]);
 
@@ -146,9 +146,7 @@ export default function ReceptionistLoginPage() {
       // Clear form
       setFormData({ username: '', password: '' });
       
-      // Redirect to dashboard (placeholder for #Manage Appointment Calendar)
-      // UD-REF: #Manage Appointment Calendar - will be implemented in future epic
-      alert('Login successful! Redirecting to Appointment Calendar...');
+      // Redirect to dashboard
       router.push('/receptionist/dashboard');
       
     } catch (error) {

@@ -16,7 +16,10 @@ import {
   LogOut, 
   ChevronDown,
   Bell,
-  Clock
+  Clock,
+  ClipboardList,
+  UserCog,
+  AlertCircle
 } from 'lucide-react';
 import { sessionManager, mockDataManager, type UserSession } from '@/lib/epic3-mock-data';
 import ReceptionistLogoutModal from '@/components/receptionist/logout-modal';
@@ -131,7 +134,7 @@ export default function ReceptionistDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="flex items-center p-6">
               <div className="flex-shrink-0">
@@ -155,13 +158,11 @@ export default function ReceptionistDashboardPage() {
               <div className="ml-4">
                 <h3 className="text-lg font-semibold text-gray-900">Appointment Calendar</h3>
                 <p className="text-sm text-gray-600">Manage appointments</p>
-                <Button 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => alert("UD-REF: #Manage Appointment Calendar - will be implemented in future epic")}
-                >
-                  View Calendar
-                </Button>
+                <Link href="/receptionist/appointment-calendar">
+                  <Button size="sm" className="mt-2">
+                    View Calendar
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -174,13 +175,11 @@ export default function ReceptionistDashboardPage() {
               <div className="ml-4">
                 <h3 className="text-lg font-semibold text-gray-900">Patient Check-in</h3>
                 <p className="text-sm text-gray-600">Check-in arriving patients</p>
-                <Button 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => alert("UD-REF: #Check-in Patient - will be implemented in future epic")}
-                >
-                  Check-in
-                </Button>
+                <Link href="/receptionist/check-in">
+                  <Button size="sm" className="mt-2">
+                    Check-in
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -193,13 +192,62 @@ export default function ReceptionistDashboardPage() {
               <div className="ml-4">
                 <h3 className="text-lg font-semibold text-gray-900">Phone Inquiries</h3>
                 <p className="text-sm text-gray-600">Handle patient calls</p>
-                <Button 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => alert("UD-REF: #Handle Phone Inquiries - will be implemented in future epic")}
-                >
-                  Manage Calls
-                </Button>
+                <Link href="/receptionist/phone-inquiries">
+                  <Button size="sm" className="mt-2">
+                    Manage Calls
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="flex items-center p-6">
+              <div className="flex-shrink-0">
+                <ClipboardList className="h-8 w-8 text-indigo-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Appointment Requests</h3>
+                <p className="text-sm text-gray-600">Process pending requests</p>
+                <Link href="/receptionist/appointment-requests">
+                  <Button size="sm" className="mt-2">
+                    Review Requests
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="flex items-center p-6">
+              <div className="flex-shrink-0">
+                <UserCog className="h-8 w-8 text-teal-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Waiting List</h3>
+                <p className="text-sm text-gray-600">Manage patient waitlist</p>
+                <Link href="/receptionist/waiting-list">
+                  <Button size="sm" className="mt-2">
+                    Manage Waitlist
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="flex items-center p-6">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-8 w-8 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Claims & Appeals</h3>
+                <p className="text-sm text-gray-600">Handle rejected claims</p>
+                <Link href="/receptionist/manage-rejections">
+                  <Button size="sm" className="mt-2">
+                    Manage Claims
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
