@@ -17,7 +17,7 @@ Within the implementation plan there will be "#" which are requirements in Userd
 Features ALWAYS map to a Userdoc Requirement through the "#"
 
 ## Implementation Plan vs Userdoc Requirements Resolution
-1. **If a Userdoc requirement references a feature (#Something) that is NOT mentioned in the current implementation plan:**
+1. **If a Userdoc requirement references a feature via the # such as (#Something) that is NOT mentioned in the current implementation plan:**
     - MUST add a comment in the code: `UD-REF: #Something - will be implemented in future epic`
     - Implement a temporary placeholder/mock behavior for the current epic
     - Do NOT implement the missing feature

@@ -234,7 +234,7 @@ export default function Home() {
               <div className="space-y-3">
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700" 
-                  onClick={() => alert("Receptionist login will be available in a future update")}
+                  onClick={() => alert("UD-REF: #Receptionist Login - will be implemented in future epic")}
                   aria-label="Go to receptionist login"
                 >
                   Receptionist Login
@@ -253,7 +253,7 @@ export default function Home() {
               <div className="space-y-3">
                 <Button 
                   className="w-full bg-purple-600 hover:bg-purple-700"
-                  onClick={() => alert("Service Provider login will be available in a future update")}
+                  onClick={() => alert("UD-REF: #Service Provider Login - will be implemented in future epic")}
                   aria-label="Go to service provider login"
                 >
                   Service Provider Login
