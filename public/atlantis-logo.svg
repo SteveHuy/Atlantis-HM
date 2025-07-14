@@ -1,0 +1,6 @@
+<svg width="150" height="40" viewBox="0 0 150 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="8" fill="#3B82F6"/>
+  <path d="M20 8L28 20H12L20 8Z" fill="white"/>
+  <path d="M20 32L12 20H28L20 32Z" fill="white"/>
+  <text x="50" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1F2937">Atlantis HMS</text>
+</svg>
