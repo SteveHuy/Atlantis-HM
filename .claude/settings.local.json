@@ -18,7 +18,8 @@
       "Bash(git add .)",
       "Bash(npx shadcn@latest add badge)",
       "Bash(npx shadcn@latest add alert-dialog)",
-      "Bash(touch claude.log)"
+      "Bash(touch claude.log)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nEpic 3: Implement Receptionist & Provider Authentication Features\n\n- Implemented Receptionist-Assisted Registration with full validation\n- Created Receptionist Login/Logout with HIPAA compliance & audit logging\n- Added Service Provider Login/Logout with session management\n- Built Update Emergency Contact feature for patients\n- Enhanced Account Recovery with Epic 3 data integration\n- Created comprehensive mock data system with audit logging\n- Added validation schemas for all forms using Zod\n- Built dashboards for receptionist and service provider roles\n- Updated homepage to link to new login pages\n- Added session management with timeout warnings and lockout features\n- Implemented secure logout flows with confirmation modals\n- All features follow HIPAA compliance standards\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": []
   }
