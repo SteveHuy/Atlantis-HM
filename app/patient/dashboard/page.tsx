@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, User, Settings, LogOut } from "lucide-react";
+import { Bell, User, Settings, LogOut, FileText, Calendar, CreditCard } from "lucide-react";
 import { mockPatient, dashboardFeatures } from "@/lib/mockDashboardData";
 import { dashboardLogger } from "@/lib/logger";
 
@@ -13,6 +13,8 @@ import { AppointmentSummary } from "@/components/patient/appointment-summary";
 import { RecentActivity } from "@/components/patient/recent-activity";
 import { ClaimStatus } from "@/components/patient/claim-status";
 import { SettingsCard } from "@/components/patient/settings-card";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/patient/logout-button";
 import { AlertBanner } from "@/components/patient/alert-banner";
 import { SearchBar } from "@/components/patient/search-bar";
@@ -68,12 +70,42 @@ export default function PatientDashboard() {
       case 'appointment-reminders':
         router.push('/patient/appointment-reminders');
         break;
+      case 'medical-records':
+        router.push('/patient/medical-records');
+        break;
       default:
         const feature = dashboardFeatures.find(f => f.id === featureId);
         if (feature) {
           alert(`UD-REF: ${feature.requirementRef} - will be implemented in future epic`);
         }
         break;
+    }
+  };
+
+  const handleFeatureClick = (feature: any) => {
+    dashboardLogger.logDashboardEvent('feature_card_click', {
+      featureId: feature.id,
+      featureTitle: feature.title,
+      requirementRef: feature.requirementRef
+    });
+
+    // Handle medical records feature
+    if (feature.id === 'medical-records') {
+      router.push('/patient/medical-records');
+      return;
+    }
+
+    // Handle other implemented features
+    switch (feature.id) {
+      case 'appointment-history':
+        router.push('/patient/appointment-history');
+        break;
+      case 'appointment-reminders':
+        router.push('/patient/appointment-reminders');
+        break;
+      default:
+        // Show placeholder for features not yet implemented
+        alert(`UD-REF: ${feature.requirementRef} - will be implemented in future epic`);
     }
   };
 
@@ -178,7 +210,40 @@ export default function PatientDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Main Features */}
             <div className="lg:col-span-2 space-y-6">
-
+              {/* Feature Navigation Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {dashboardFeatures.map((feature) => (
+                  <Card key={feature.id} className="p-4 hover:shadow-lg transition-shadow cursor-pointer group">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        feature.color === 'blue' ? 'bg-blue-100 text-blue-600' :
+                        feature.color === 'green' ? 'bg-green-100 text-green-600' :
+                        feature.color === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
+                        feature.color === 'purple' ? 'bg-purple-100 text-purple-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {feature.icon === 'FileText' && <FileText className="w-5 h-5" />}
+                        {feature.icon === 'Calendar' && <Calendar className="w-5 h-5" />}
+                        {feature.icon === 'Bell' && <Bell className="w-5 h-5" />}
+                        {feature.icon === 'CreditCard' && <CreditCard className="w-5 h-5" />}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          {feature.title}
+                        </h3>
+                        <p className="text-sm text-gray-600">{feature.description}</p>
+                      </div>
+                    </div>
+                    <Button 
+                      className="w-full mt-3" 
+                      variant="outline"
+                      onClick={() => handleFeatureClick(feature)}
+                    >
+                      Access {feature.title}
+                    </Button>
+                  </Card>
+                ))}
+              </div>
 
               {/* Upcoming Appointments */}
               <AppointmentSummary />

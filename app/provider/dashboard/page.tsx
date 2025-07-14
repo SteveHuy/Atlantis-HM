@@ -12,7 +12,10 @@ import {
   Stethoscope,
   ClipboardList,
   Pill,
-  MessageSquare
+  MessageSquare,
+  AlertTriangle,
+  Shield,
+  Edit
 } from 'lucide-react';
 import { sessionManager, mockDataManager, type UserSession } from '@/lib/epic3-mock-data';
 import ServiceProviderLogoutModal from '@/components/provider/logout-modal';
@@ -164,7 +167,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   size="sm" 
                   className="mt-2"
-                  onClick={() => alert("UD-REF: #Document Patient Encounter - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/encounter")}
                 >
                   New Encounter
                 </Button>
@@ -209,7 +212,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => alert("UD-REF: #Order Lab Tests - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/lab-tests")}
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   Order Lab Tests
@@ -217,7 +220,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => alert("UD-REF: #Review Lab Results - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/lab-results")}
                 >
                   <ClipboardList className="mr-2 h-4 w-4" />
                   Review Lab Results
@@ -225,10 +228,34 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => alert("UD-REF: #Generate Referrals - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/referrals")}
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Generate Referrals
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push("/provider/allergies")}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Update Allergies
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push("/provider/immunizations")}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Track Immunizations
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push("/provider/encounter-notes")}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Update Encounter Notes
                 </Button>
                 <Button 
                   variant="outline" 

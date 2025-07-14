@@ -172,7 +172,8 @@ export default function CheckInPatientPage() {
   };
 
   const handleViewMedicalRecords = (patientId: string) => {
-    alert('UD-REF: #View Medical Records - will be implemented in future epic');
+    // Navigate to patient EHR page with patient ID as search parameter
+    router.push(`/receptionist/patient-ehr?patientId=${patientId}`);
   };
 
   const getStatusColor = (status: string) => {
