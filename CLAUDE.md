@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Log ALL your activity within "claude.log" such as your TODO plan and the individiual steps within the TODO plan.
+You MUST ALWAYS log ALL your activity within "claude.log" such as your TODO plan and the individiual steps within the TODO plan.
 
 # 🧱 Userdoc Project Guideline
 
@@ -13,6 +13,8 @@ This guide indicates how you MUST implement implementation plans from markdown d
 You will be given implementation plans which are markdown documents that contain all of the steps you need to implement an epic within the system. Ensure when you are implementing the plan you DO NOT effect any code that is not effected by the epic within the implementation plan.
 
 Within the implementation plan there will be "#" which are requirements in Userdoc - you MUST retrieve those requirements via MCP to get their full details.
+
+Features ALWAYS map to a Userdoc Requirement through the "#"
 
 ## Implementation Plan vs Userdoc Requirements Resolution
 1. **If a Userdoc requirement references a feature (#Something) that is NOT mentioned in the current implementation plan:**
@@ -34,15 +36,15 @@ So for the Patient Login, the correct approach would be:
 - Add comment: // UD-REF: #Patient Dashboard - will be implemented in future epic
 - Follow the implementation plan's scope for this epic
 
-## UD-REF Linking for Future Epics
-**When implementing future epics that introduce new features referenced by previous UD-REF comments:**
+## UD-REF Linking for Future Features
+**When implementing future features as represented by the # if its referenced by previous UD-REF comments:**
 
-1. **Before starting implementation of any new epic:**
+1. **Before starting implementation of any new feature (#):**
     - Search the entire codebase for `UD-REF: #RequirementName` comments
     - Create a list of all places that reference the new feature being implemented
 
 2. **During implementation:**
-    - For each UD-REF comment found that matches the current epic's features:
+    - For each UD-REF comment found that matches the current feature:
     - Replace the temporary placeholder/mock behavior with the actual implementation
     - Remove the `UD-REF: #RequirementName` comment
     - Link the existing code to the newly created feature
