@@ -464,6 +464,10 @@ export class ClinicalDataManager {
     return this.patients;
   }
 
+  getAllPatients(): Patient[] {
+    return this.patients;
+  }
+
   getPatient(id: string): Patient | undefined {
     return this.patients.find(p => p.id === id);
   }
