@@ -12,7 +12,6 @@ import {
   Clock, 
   Calendar, 
   User, 
-  MapPin, 
   Plus, 
   Trash2, 
   AlertCircle,
@@ -28,9 +27,7 @@ import {
 } from "@/lib/epic4-validation";
 import { 
   Epic4MockDataManager, 
-  type WaitlistEntry,
-  type Provider,
-  type ServiceType
+  type WaitlistEntry
 } from "@/lib/epic4-mock-data";
 
 export default function WaitingListPage() {
@@ -75,6 +72,7 @@ export default function WaitingListPage() {
       }
       setShowAddForm(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filter providers based on selected service type
@@ -107,7 +105,7 @@ export default function WaitingListPage() {
       }
       
       // Add to waitlist
-      const newEntry = Epic4MockDataManager.addToWaitlist({
+      Epic4MockDataManager.addToWaitlist({
         patientId: 'patient-john',
         providerId: data.providerId,
         providerName: provider.name,
@@ -135,7 +133,7 @@ export default function WaitingListPage() {
       // Clear notification after 3 seconds
       setTimeout(() => setNotification(null), 3000);
       
-    } catch (error) {
+    } catch {
       setNotification({
         type: 'error',
         message: 'Failed to add to waitlist. Please try again.'
@@ -168,7 +166,7 @@ export default function WaitingListPage() {
       } else {
         throw new Error('Failed to remove entry');
       }
-    } catch (error) {
+    } catch {
       setNotification({
         type: 'error',
         message: 'Failed to remove from waitlist. Please try again.'

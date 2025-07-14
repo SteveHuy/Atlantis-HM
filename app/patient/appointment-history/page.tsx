@@ -59,8 +59,7 @@ export default function AppointmentHistoryPage() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-    watch
+    reset
   } = useForm<AppointmentHistoryFiltersData>({
     resolver: zodResolver(appointmentHistoryFiltersSchema)
   });

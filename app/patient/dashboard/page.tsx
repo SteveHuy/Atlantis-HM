@@ -9,7 +9,6 @@ import { mockPatient, dashboardFeatures } from "@/lib/mockDashboardData";
 import { dashboardLogger } from "@/lib/logger";
 
 // Component imports
-import { FeatureCard, IconName, ColorName } from "@/components/patient/feature-card";
 import { AppointmentSummary } from "@/components/patient/appointment-summary";
 import { RecentActivity } from "@/components/patient/recent-activity";
 import { ClaimStatus } from "@/components/patient/claim-status";
@@ -179,25 +178,7 @@ export default function PatientDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Main Features */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Feature Cards Navigation */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Quick Access
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {dashboardFeatures.map((feature) => (
-                    <FeatureCard
-                      key={feature.id}
-                      id={feature.id}
-                      title={feature.title}
-                      description={feature.description}
-                      icon={feature.icon as IconName}
-                      color={feature.color as ColorName}
-                      requirementRef={feature.requirementRef}
-                    />
-                  ))}
-                </div>
-              </div>
+
 
               {/* Upcoming Appointments */}
               <AppointmentSummary />

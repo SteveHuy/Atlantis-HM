@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
@@ -137,7 +136,7 @@ export default function ScheduleAppointmentPage() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Create appointment
-      const appointment = Epic4MockDataManager.scheduleAppointment({
+      Epic4MockDataManager.scheduleAppointment({
         patientId: 'patient-john',
         providerId: appointmentSummary.provider.id,
         providerName: appointmentSummary.provider.name,
@@ -158,7 +157,7 @@ export default function ScheduleAppointmentPage() {
       });
       
       setStep(7);
-    } catch (error) {
+    } catch {
       setSubmissionResult({
         success: false,
         message: 'Failed to schedule appointment. Please try again.'

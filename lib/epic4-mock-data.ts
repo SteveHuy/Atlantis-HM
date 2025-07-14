@@ -453,11 +453,13 @@ export class Epic4MockDataManager {
   }
 
   // Reminder management
-  static getReminderSettings(patientId: string): ReminderSettings {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static getReminderSettings(_patientId: string): ReminderSettings {
     return { ...this.reminderSettings };
   }
 
-  static updateReminderSettings(patientId: string, settings: Partial<ReminderSettings>): ReminderSettings {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static updateReminderSettings(_patientId: string, settings: Partial<ReminderSettings>): ReminderSettings {
     this.reminderSettings = {
       ...this.reminderSettings,
       ...settings,
@@ -466,7 +468,8 @@ export class Epic4MockDataManager {
     return { ...this.reminderSettings };
   }
 
-  static sendTestReminder(patientId: string): ReminderLog {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static sendTestReminder(_patientId: string): ReminderLog {
     const testReminder: ReminderLog = {
       id: `test-${Date.now()}`,
       appointmentId: 'test',
@@ -482,7 +485,8 @@ export class Epic4MockDataManager {
     return testReminder;
   }
 
-  static getReminderLogs(patientId: string): ReminderLog[] {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static getReminderLogs(_patientId: string): ReminderLog[] {
     return [...this.reminderLogs].sort((a, b) => 
       new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
     );

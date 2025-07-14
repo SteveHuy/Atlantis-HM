@@ -45,7 +45,6 @@ export default function AppointmentRemindersPage() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
     setValue,
     watch
   } = useForm<ReminderSettingsData>({
@@ -53,12 +52,6 @@ export default function AppointmentRemindersPage() {
   });
 
   const watchedIntervals = watch('intervals') || [];
-
-  // Load current settings on mount
-  useEffect(() => {
-    loadSettings();
-    loadReminderLogs();
-  }, []);
 
   // Load current reminder settings
   const loadSettings = async () => {
@@ -93,6 +86,13 @@ export default function AppointmentRemindersPage() {
       console.error('Error loading reminder logs:', error);
     }
   };
+
+  // Load current settings on mount
+  useEffect(() => {
+    loadSettings();
+    loadReminderLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Show notification
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {

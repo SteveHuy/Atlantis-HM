@@ -167,15 +167,15 @@ export const formatDateForDisplay = (dateString: string): string => {
 
 // Error handling helpers
 export const getFieldError = (
-  errors: Record<string, any>,
+  errors: Record<string, unknown>,
   fieldName: string
 ): string | undefined => {
-  const error = errors[fieldName];
+  const error = errors[fieldName] as { message?: string; _errors?: string[] } | undefined;
   return error?.message || error?._errors?.[0];
 };
 
 export const hasFieldError = (
-  errors: Record<string, any>,
+  errors: Record<string, unknown>,
   fieldName: string
 ): boolean => {
   return !!getFieldError(errors, fieldName);
