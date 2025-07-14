@@ -1,6 +1,6 @@
 Userdoc Implementation Plan
 
-# 1. Implement Patient Dashboard (#Patient Dashboard)
+# 1. #Patient Dashboard
 
 ## 1.1 Patient Dashboard Page
 - Create `/app/patient/dashboard/page.tsx` as the main dashboard for logged-in patients.

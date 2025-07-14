@@ -37,37 +37,65 @@ So for the Patient Login, the correct approach would be:
 - Follow the implementation plan's scope for this epic
 
 ## Implementing Future Features
-**When implementing future features represented by the # in the implementation plan:**
+
+### 🔍 **TRIGGER PATTERN RECOGNITION**
+**AUTOMATICALLY trigger the following process when you encounter ANY heading that matches this pattern:**
+
+**Pattern:** `# [number]. #[RequirementName]`
+
+**Examples that trigger this process:**
+- `# 1. #Patient Dashboard`
+- `# 2. #Service Provider Login`
+- `# 3. #Appointment Management`
+- `# 4.1 #Profile Management`
+
+**Recognition Rules:**
+- Starts with `#` (h1 heading)
+- Contains a number (can include decimals like `1.1` or `2.3`)
+- Contains a period after the number
+- Contains another `#` symbol followed by the requirement name
+- The requirement name after `#` is the Userdoc requirement identifier
+
+### 🚀 **MANDATORY IMPLEMENTATION PROCESS**
+**When implementing ANY feature that matches the trigger pattern above:**
 
 1. **Before starting implementation of any new feature:**
-    - Search the entire codebase for `UD-REF: #RequirementName` comments
-    - Create a list of all places that reference the new feature being implemented
+   - Search the entire codebase for `UD-REF: #RequirementName` comments
+   - Create a list of all places that reference the new feature being implemented
 
 2. **During implementation:**
-    - For each UD-REF comment found that matches the current feature:
-    - Replace the temporary placeholder/mock behavior with the actual implementation
-    - Remove the `UD-REF: #RequirementName` comment
-    - Link the existing code to the newly created feature
+   - For each UD-REF comment found that matches the current feature:
+   - Replace the temporary placeholder/mock behavior with the actual implementation
+   - Remove the `UD-REF: #RequirementName` comment
+   - Link the existing code to the newly created feature
 
 3. **Search strategy:**
-    - Use grep/search tools to find: `UD-REF: #FeatureName`
-    - Check all file types: `.tsx`, `.ts`, `.js`, `.jsx`
-    - Look in comments, TODOs, and code documentation
+   - Use grep/search tools to find: `UD-REF: #FeatureName`
+   - Check all file types: `.tsx`, `.ts`, `.js`, `.jsx`
+   - Look in comments, TODOs, and code documentation
 
 4. **Example workflow:**
-    ```bash
-    # When implementing Patient Dashboard in a future epic:
-    grep -r "UD-REF: #Patient Dashboard" . --include="*.tsx" --include="*.ts"
+   ```bash
+   # When implementing Patient Dashboard in a future epic:
+   grep -r "UD-REF: #Patient Dashboard" . --include="*.tsx" --include="*.ts"
 
-    # Results might show:
-    # ./app/patient/login/page.tsx: // UD-REF: #Patient Dashboard - will be implemented in future epic
-    # ./app/patient/profile/page.tsx: // UD-REF: #Patient Dashboard - will be implemented in future epic
+   # Results might show:
+   # ./app/patient/login/page.tsx: // UD-REF: #Patient Dashboard - will be implemented in future epic
+   # ./app/patient/profile/page.tsx: // UD-REF: #Patient Dashboard - will be implemented in future epic
+   ```
 
-5. Update process:
-- Replace temporary redirects with actual navigation to the new feature
-- Update placeholder text/alerts with real functionality
-- Ensure all connected flows work end-to-end
-- Test that the previously deferred functionality now works properly
+5. **Update process:**
+   - Replace temporary redirects with actual navigation to the new feature
+   - Update placeholder text/alerts with real functionality
+   - Ensure all connected flows work end-to-end
+   - Test that the previously deferred functionality now works properly
+
+### ⚠️ **CRITICAL REMINDER**
+**EVERY TIME you see a heading like `# 1. #Patient Dashboard`, you MUST:**
+1. Recognize this as a Userdoc requirement implementation
+2. Search for existing `UD-REF: #Patient Dashboard` comments
+3. Follow the complete implementation process above
+4. Connect all previously deferred functionality
     
 Please autonomously complete these tasks, ensuring you retrieve the requirements and implement.
 
