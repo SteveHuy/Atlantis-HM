@@ -36,10 +36,10 @@ So for the Patient Login, the correct approach would be:
 - Add comment: // UD-REF: #Patient Dashboard - will be implemented in future epic
 - Follow the implementation plan's scope for this epic
 
-## UD-REF Linking for Future Features
-**When implementing future features as represented by the # if its referenced by previous UD-REF comments:**
+## Implementing Future Features
+**When implementing future features represented by the # in the implementation plan:**
 
-1. **Before starting implementation of any new feature (#):**
+1. **Before starting implementation of any new feature:**
     - Search the entire codebase for `UD-REF: #RequirementName` comments
     - Create a list of all places that reference the new feature being implemented
 
