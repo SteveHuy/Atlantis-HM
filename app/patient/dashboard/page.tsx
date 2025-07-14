@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Bell, User, Settings, LogOut } from "lucide-react";
@@ -23,6 +24,7 @@ interface UserSession {
 }
 
 export default function PatientDashboard() {
+  const router = useRouter();
   const [user, setUser] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,9 +62,19 @@ export default function PatientDashboard() {
   }, []);
 
   const handleFeatureSelect = (featureId: string) => {
-    const feature = dashboardFeatures.find(f => f.id === featureId);
-    if (feature) {
-      alert(`UD-REF: ${feature.requirementRef} - will be implemented in future epic`);
+    switch (featureId) {
+      case 'appointment-history':
+        router.push('/patient/appointment-history');
+        break;
+      case 'appointment-reminders':
+        router.push('/patient/appointment-reminders');
+        break;
+      default:
+        const feature = dashboardFeatures.find(f => f.id === featureId);
+        if (feature) {
+          alert(`UD-REF: ${feature.requirementRef} - will be implemented in future epic`);
+        }
+        break;
     }
   };
 

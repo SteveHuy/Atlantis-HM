@@ -132,8 +132,7 @@ export default function PatientRegister() {
       // Show success message
       alert("Registration successful, please verify your email");
 
-      // UD-REF: #Schedule Appointment - will be implemented in future epic
-      alert("Schedule Appointment feature will be available in a future update.");
+      router.push('/patient/schedule-appointment');
 
     } catch {
       setRegistrationError("An error occurred during registration. Please try again.");

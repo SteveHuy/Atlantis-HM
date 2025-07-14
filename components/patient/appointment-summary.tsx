@@ -3,13 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
 import { mockUpcomingAppointments } from "@/lib/mockDashboardData";
 import { dashboardLogger } from "@/lib/logger";
+import { useRouter } from "next/navigation";
 
 export function AppointmentSummary() {
+  const router = useRouter();
   const upcomingAppointments = mockUpcomingAppointments.slice(0, 3);
 
   const handleViewAll = () => {
     dashboardLogger.logDashboardEvent('view_all_appointments_click');
-    alert("UD-REF: #View Appointment History - will be implemented in future epic");
+    router.push('/patient/appointment-history');
+  };
+
+  const handleScheduleAppointment = () => {
+    dashboardLogger.logDashboardEvent('schedule_appointment_click');
+    router.push('/patient/schedule-appointment');
   };
 
   const formatDate = (dateString: string) => {
@@ -34,7 +41,7 @@ export function AppointmentSummary() {
           <Button 
             className="mt-4" 
             variant="outline"
-            onClick={() => alert("UD-REF: #Schedule Appointment - will be implemented in future epic")}
+            onClick={handleScheduleAppointment}
           >
             Schedule Appointment
           </Button>
