@@ -68,6 +68,7 @@ So for the Patient Login, the correct approach would be:
    - Replace the temporary placeholder/mock behavior with the actual implementation
    - Remove the `UD-REF: #RequirementName` comment
    - Link the existing code to the newly created feature
+   - Do not add a comment
 
 3. **Search strategy:**
    - Use grep/search tools to find: `UD-REF: #FeatureName`
@@ -284,22 +285,5 @@ Use libraries like `zod` for input validation and sanitize outputs before render
 - 🧱 Implementation with best practices
 - 🔎 Review and Optimization
 - ✅ Finalization (secure, test-covered, documented)
-
----
-
-## 🔤 Special Character Handling
-
-- Replace all special characters with their appropriate HTML entities:
-  - `'` → `&apos;` (apostrophe)
-  - `"` → `&quot;` (quotation mark)
-  - `&` → `&amp;` (ampersand)
-  - `<` → `&lt;` (less than)
-  - `>` → `&gt;` (greater than)
-- Apply this consistently across all text content, especially in:
-  - JSX/TSX components
-  - API responses
-  - Database strings
-  - Configuration files
-  - Documentation
 
 ---
