@@ -321,7 +321,7 @@ export default function GenerateStatementsPage() {
         {/* Statement Preview Modal */}
         {showPreview && statementData && (
           <Dialog open={showPreview} onOpenChange={setShowPreview}>
-            <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Statement Preview</DialogTitle>
               </DialogHeader>

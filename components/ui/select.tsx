@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {}
 
-const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+const BasicSelect = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, children, ...props }, ref) => {
     return (
       <select
@@ -22,7 +22,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     );
   }
 );
-Select.displayName = "Select";
+BasicSelect.displayName = "BasicSelect";
 
 // Simple implementation for the dropdown select components needed
 export interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -33,6 +33,7 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
   ({ className, children, ...props }, ref) => (
     <button
       ref={ref}
+      type="button"
       className={cn(
         "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
@@ -40,6 +41,22 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
       {...props}
     >
       {children}
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 15 15"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 opacity-50"
+      >
+        <path
+          d="m4.5 6 3 3 3-3"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </button>
   )
 );
@@ -66,7 +83,7 @@ const SelectContent = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80",
+      "absolute z-50 min-w-full mt-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80",
       className
     )}
     {...props}
@@ -83,7 +100,7 @@ const SelectItem = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-3 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     data-value={value}
@@ -94,54 +111,115 @@ const SelectItem = React.forwardRef<
 ));
 SelectItem.displayName = "SelectItem";
 
-// Create a simple wrapper that handles the select logic
-interface SimpleSelectProps {
+// Create a proper Select component that handles the dropdown logic
+interface SelectComponentProps {
   value: string;
   onValueChange: (value: string) => void;
   children: React.ReactNode;
 }
 
-const SimpleSelectWrapper: React.FC<SimpleSelectProps> = ({ value, onValueChange, children }) => {
+const Select: React.FC<SelectComponentProps> = ({ value, onValueChange, children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [displayValue, setDisplayValue] = React.useState(value);
+  const [selectedLabel, setSelectedLabel] = React.useState<string>('');
+  const selectRef = React.useRef<HTMLDivElement>(null);
+  
+  // Extract the SelectTrigger, SelectContent, and other components from children
+  const triggerChild = React.Children.toArray(children).find(child => 
+    React.isValidElement(child) && child.type === SelectTrigger
+  );
+  
+  const contentChild = React.Children.toArray(children).find(child => 
+    React.isValidElement(child) && child.type === SelectContent
+  );
 
+  // Find the selected item's label
   React.useEffect(() => {
-    setDisplayValue(value);
-  }, [value]);
+    if (React.isValidElement(contentChild)) {
+      const items = React.Children.toArray(contentChild.props.children);
+      const selectedItem = items.find(item => 
+        React.isValidElement(item) && item.props.value === value
+      );
+      if (React.isValidElement(selectedItem)) {
+        setSelectedLabel(selectedItem.props.children || '');
+      }
+    }
+  }, [value, contentChild]);
+
+  // Handle click outside to close dropdown
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // Handle keyboard navigation
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  const handleItemClick = (itemValue: string) => {
+    onValueChange(itemValue);
+    setIsOpen(false);
+  };
 
   return (
-    <div className="relative">
-      {React.Children.map(children, child => {
-        if (React.isValidElement(child)) {
-          if (child.type === SelectTrigger) {
-            return React.cloneElement(child, {
-              onClick: () => setIsOpen(!isOpen),
-              ...child.props
-            });
-          }
-          if (child.type === SelectContent && isOpen) {
-            return React.cloneElement(child, {
-              ...child.props,
-              children: React.Children.map(child.props.children, item => {
-                if (React.isValidElement(item) && item.type === SelectItem) {
-                  return React.cloneElement(item, {
-                    onClick: () => {
-                      onValueChange(item.props.value);
-                      setDisplayValue(item.props.value);
-                      setIsOpen(false);
-                    },
-                    ...item.props
-                  });
-                }
-                return item;
-              })
-            });
-          }
-        }
-        return child;
-      })}
+    <div className="relative" ref={selectRef}>
+      {React.isValidElement(triggerChild) && 
+        React.cloneElement(triggerChild, {
+          onClick: () => setIsOpen(!isOpen),
+          'aria-expanded': isOpen,
+          'aria-haspopup': 'listbox',
+          children: React.Children.map(triggerChild.props.children, child => {
+            if (React.isValidElement(child) && child.type === SelectValue) {
+              return React.cloneElement(child, {
+                children: selectedLabel || child.props.placeholder
+              });
+            }
+            return child;
+          })
+        })
+      }
+      
+      {isOpen && React.isValidElement(contentChild) && 
+        React.cloneElement(contentChild, {
+          role: 'listbox',
+          children: React.Children.map(contentChild.props.children, child => {
+            if (React.isValidElement(child) && child.type === SelectItem) {
+              return React.cloneElement(child, {
+                onClick: () => handleItemClick(child.props.value),
+                role: 'option',
+                'aria-selected': value === child.props.value,
+                className: cn(
+                  child.props.className,
+                  value === child.props.value ? 'bg-accent text-accent-foreground' : ''
+                )
+              });
+            }
+            return child;
+          })
+        })
+      }
     </div>
   );
 };
 
-export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SimpleSelectWrapper };
+export { Select, BasicSelect, SelectTrigger, SelectValue, SelectContent, SelectItem };
