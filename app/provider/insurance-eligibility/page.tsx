@@ -66,13 +66,18 @@ export default function InsuranceEligibilityPage() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<Record<keyof EligibilityForm, string>> = {};
-        error.errors.forEach((err) => {
-          if (err.path.length > 0) {
-            const field = err.path[0] as keyof EligibilityForm;
-            fieldErrors[field] = err.message;
+        // Use 'issues' property which is the correct property for ZodError
+        error.issues.forEach((issue) => {
+          if (issue.path && issue.path.length > 0) {
+            const field = issue.path[0] as keyof EligibilityForm;
+            fieldErrors[field] = issue.message;
           }
         });
         setErrors(fieldErrors);
+      } else {
+        // Handle non-ZodError cases
+        console.error('Non-ZodError validation error:', error);
+        setErrors({ patientInsurance: 'An unexpected validation error occurred' });
       }
       return false;
     }

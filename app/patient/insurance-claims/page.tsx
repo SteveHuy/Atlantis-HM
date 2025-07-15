@@ -25,7 +25,7 @@ const mockClaims = [
     billingCodes: "99213, 99000, 85025"
   },
   {
-    id: "CLM-2024-002", 
+    id: "CLM-2024-002",
     date: "2024-02-03",
     amount: 125.50,
     status: "Submitted" as const,
@@ -38,7 +38,7 @@ const mockClaims = [
     date: "2024-02-20",
     amount: 680.00,
     status: "Denied" as const,
-    patientDetails: "John Smith, DOB: 01/15/1980", 
+    patientDetails: "John Smith, DOB: 01/15/1980",
     encounterInfo: "Specialist Consultation - Dr. Williams",
     billingCodes: "99244, 99000"
   },
@@ -48,14 +48,14 @@ const mockClaims = [
     amount: 320.75,
     status: "Approved" as const,
     patientDetails: "John Smith, DOB: 01/15/1980",
-    encounterInfo: "Follow-up Visit - Dr. Johnson", 
+    encounterInfo: "Follow-up Visit - Dr. Johnson",
     billingCodes: "99214, 99000"
   }
 ];
 
 const statusColors = {
   Submitted: "bg-blue-100 text-blue-800 border-blue-200",
-  Approved: "bg-green-100 text-green-800 border-green-200", 
+  Approved: "bg-green-100 text-green-800 border-green-200",
   Denied: "bg-red-100 text-red-800 border-red-200"
 };
 
@@ -79,7 +79,7 @@ export default function InsuranceClaimsPage() {
 
     filtered.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (sortField) {
         case 'date':
           aValue = new Date(a.date);
@@ -123,7 +123,7 @@ export default function InsuranceClaimsPage() {
     // Simulate PDF download
     const element = document.createElement('a');
     const file = new Blob([`Insurance Claim Summary
-    
+
 Claim ID: ${claim.id}
 Date: ${claim.date}
 Amount: $${claim.amount.toFixed(2)}
@@ -134,7 +134,7 @@ Encounter: ${claim.encounterInfo}
 Billing Codes: ${claim.billingCodes}
 
 This is a simulated PDF download.`], { type: 'text/plain' });
-    
+
     element.href = URL.createObjectURL(file);
     element.download = `claim-summary-${claim.id}.txt`;
     document.body.appendChild(element);
@@ -197,7 +197,7 @@ This is a simulated PDF download.`], { type: 'text/plain' });
                   />
                 </div>
               </div>
-              
+
               {/* Status Filter */}
               <div className="flex items-center space-x-2">
                 <Filter className="h-4 w-4 text-gray-500" />
@@ -320,7 +320,7 @@ This is a simulated PDF download.`], { type: 'text/plain' });
                                 <div className="flex justify-between items-center">
                                   <div>
                                     <p className="text-sm text-gray-600">Amount: <span className="font-semibold">${claim.amount.toFixed(2)}</span></p>
-                                    <p className="text-sm text-gray-600">Status: 
+                                    <p className="text-sm text-gray-600">Status:
                                       <Badge className={`ml-2 ${statusColors[claim.status]}`} variant="outline">
                                         {claim.status}
                                       </Badge>
@@ -350,7 +350,7 @@ This is a simulated PDF download.`], { type: 'text/plain' });
                 <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No claims found</h3>
                 <p className="text-gray-600 mb-4">
-                  {searchTerm || statusFilter !== "all" 
+                  {searchTerm || statusFilter !== "all"
                     ? "Try adjusting your search or filter criteria."
                     : "You don't have any insurance claims yet."
                   }
