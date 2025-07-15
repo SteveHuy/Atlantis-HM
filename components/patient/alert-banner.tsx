@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { mockNotifications } from "@/lib/mockDashboardData";
 import { dashboardLogger } from "@/lib/logger";
+import { useRouter } from "next/navigation";
 
 const iconMap = {
   warning: AlertTriangle,
@@ -28,6 +29,7 @@ const colorClasses = {
 };
 
 export function AlertBanner() {
+  const router = useRouter();
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
   
   const visibleNotifications = mockNotifications.filter(
@@ -46,7 +48,7 @@ export function AlertBanner() {
     });
 
     if (notification.title === "Unread Messages") {
-      alert("UD-REF: #Secure Messaging - will be implemented in future epic");
+      router.push('/patient/messages');
     } else if (notification.title === "Verify Your Email") {
       alert("Email verification will be implemented in future epic");
     }
