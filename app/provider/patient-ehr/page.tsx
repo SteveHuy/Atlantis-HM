@@ -266,10 +266,7 @@ export default function ViewPatientEHRPage() {
     window.print();
   };
 
-  const navigateToPatientHistory = () => {
-    // UD-REF: Navigate to View Patient History
-    alert('UD-REF: #View Patient History - will be implemented in future epic');
-  };
+
 
   if (isLoading) {
     return (
@@ -654,17 +651,7 @@ export default function ViewPatientEHRPage() {
             {activeSection === 'visits' && (
               <Card>
                 <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Visit Summaries</CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={navigateToPatientHistory}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Full History
-                    </Button>
-                  </div>
+                  <CardTitle>Visit Summaries</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
