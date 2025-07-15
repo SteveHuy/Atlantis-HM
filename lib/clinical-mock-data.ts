@@ -197,6 +197,42 @@ export interface LabTest {
   turnaroundTime: string;
 }
 
+export interface LabResultsFilter {
+  patientId: string;
+  dateFrom: string;
+  dateTo: string;
+  status: 'pending' | 'completed' | 'abnormal' | 'critical' | '';
+  provider: string;
+}
+
+export interface ReviewData {
+  resultId: string;
+  notes: string;
+  reviewerId: string;
+  followUpRequired: boolean;
+  followUpInstructions: string;
+}
+
+export interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: string;
+}
+
+export type TestResult = {
+  name: string;
+  value: string;
+  unit: string;
+  referenceRange: string;
+  isAbnormal: boolean;
+  isCritical: boolean;
+};
+
+export interface ExtendedLabResult extends LabResult {
+  patientName: string;
+}
+
 // Mock data
 export const mockPatients: Patient[] = [
   {

@@ -57,18 +57,18 @@ export default function DocumentPatientEncounterPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients
     const patientsData = clinicalDataManager.getPatients();
     setPatients(patientsData);
-    
+
     setIsLoading(false);
   }, [router]);
 
@@ -191,17 +191,17 @@ export default function DocumentPatientEncounterPage() {
 
       // Save encounter
       const savedEncounter = clinicalDataManager.addEncounter(formData.patientId, encounter);
-      
+
       // Log encounter creation for audit trail
       logClinicalAccess('create_encounter', formData.patientId, session?.username || 'unknown');
-      
+
       setSuccess(true);
-      
+
       // Redirect to patient EHR after a short delay
       setTimeout(() => {
         router.push(`/provider/patient-ehr?patientId=${formData.patientId}`);
       }, 2000);
-      
+
     } catch (error) {
       console.error("Error saving encounter:", error);
       setValidationErrors({ general: "Failed to save encounter. Please try again." });
@@ -268,7 +268,7 @@ export default function DocumentPatientEncounterPage() {
               <span>Back to Dashboard</span>
             </button>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Document Patient Encounter</h1>
           <p className="text-gray-600 mt-2">
             Record details of patient encounters for accurate and up-to-date patient records
@@ -283,7 +283,7 @@ export default function DocumentPatientEncounterPage() {
               <User className="w-5 h-5 text-blue-600" />
               <h2 className="text-xl font-semibold text-gray-900">Patient Selection</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -305,7 +305,7 @@ export default function DocumentPatientEncounterPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.patientId}</p>
                 )}
               </div>
-              
+
               {selectedPatient && (
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <h3 className="font-medium text-blue-900 mb-2">Patient Information</h3>
@@ -325,7 +325,7 @@ export default function DocumentPatientEncounterPage() {
               <FileText className="w-5 h-5 text-green-600" />
               <h2 className="text-xl font-semibold text-gray-900">Encounter Details</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -351,7 +351,7 @@ export default function DocumentPatientEncounterPage() {
               <Stethoscope className="w-5 h-5 text-red-600" />
               <h2 className="text-xl font-semibold text-gray-900">Vital Signs</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Height</label>
@@ -363,7 +363,7 @@ export default function DocumentPatientEncounterPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Weight</label>
                 <input
@@ -374,7 +374,7 @@ export default function DocumentPatientEncounterPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Blood Pressure</label>
                 <input
@@ -388,7 +388,7 @@ export default function DocumentPatientEncounterPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors['vitals.bloodPressure']}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Heart Rate</label>
                 <input
@@ -402,7 +402,7 @@ export default function DocumentPatientEncounterPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors['vitals.heartRate']}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Temperature</label>
                 <input
@@ -416,7 +416,7 @@ export default function DocumentPatientEncounterPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors['vitals.temperature']}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Respiratory Rate</label>
                 <input
@@ -430,7 +430,7 @@ export default function DocumentPatientEncounterPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors['vitals.respiratoryRate']}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Oxygen Saturation</label>
                 <input
@@ -453,7 +453,7 @@ export default function DocumentPatientEncounterPage() {
               <ClipboardList className="w-5 h-5 text-purple-600" />
               <h2 className="text-xl font-semibold text-gray-900">Diagnoses</h2>
             </div>
-            
+
             <div className="space-y-4">
               {formData.diagnoses.map((diagnosis, index) => (
                 <div key={index} className="flex items-center space-x-2">
@@ -477,7 +477,7 @@ export default function DocumentPatientEncounterPage() {
                   )}
                 </div>
               ))}
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -486,7 +486,7 @@ export default function DocumentPatientEncounterPage() {
               >
                 Add Another Diagnosis
               </Button>
-              
+
               {validationErrors.diagnoses && (
                 <p className="mt-2 text-sm text-red-600">{validationErrors.diagnoses}</p>
               )}
@@ -511,7 +511,7 @@ export default function DocumentPatientEncounterPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.treatmentPlan}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Additional Notes
@@ -536,7 +536,7 @@ export default function DocumentPatientEncounterPage() {
               <Upload className="w-5 h-5 text-orange-600" />
               <h2 className="text-xl font-semibold text-gray-900">Attachments</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -556,7 +556,7 @@ export default function DocumentPatientEncounterPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               {formData.attachments.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700">Uploaded Files:</p>

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Download, Eye, Calendar, User, TestTube, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowLeft, Download, TestTube, CheckCircle, AlertTriangle, Filter, Bell, Edit } from "lucide-react";
 import { clinicalDataManager } from "@/lib/clinical-mock-data";
-import { reviewLabResultsSchema, logClinicalAccess } from "@/lib/clinical-validation";
+import { reviewLabResultSchema, logClinicalAccess } from "@/lib/clinical-validation";
 import { sessionManager, type UserSession } from "@/lib/epic3-mock-data";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,14 +26,54 @@ interface ReviewData {
   followUpInstructions: string;
 }
 
+interface Patient {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface TestResult {
+  name: string;
+  value: string;
+  unit: string;
+  referenceRange: string;
+  isAbnormal: boolean;
+  isCritical?: boolean;
+}
+
+interface LabResult {
+  id: string;
+  testName: string;
+  testCode: string;
+  orderDate: string;
+  resultDate: string;
+  status: string;
+  priority: string;
+  patientName: string;
+  patientId: string;
+  providerId: string;
+  results: TestResult[];
+  reviewed: boolean;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  notes?: string;
+}
+
+interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: string;
+}
+
 export default function ReviewLabResultsPage() {
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [labResults, setLabResults] = useState<any[]>([]);
-  const [filteredResults, setFilteredResults] = useState<any[]>([]);
-  const [patients, setPatients] = useState<any[]>([]);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [labResults, setLabResults] = useState<LabResult[]>([]);
+  const [filteredResults, setFilteredResults] = useState<LabResult[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedResult, setSelectedResult] = useState<LabResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<LabResultsFilter>({
@@ -51,25 +91,25 @@ export default function ReviewLabResultsPage() {
     followUpInstructions: ''
   });
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients and lab results
     const patientsData = clinicalDataManager.getAllPatients();
     setPatients(patientsData);
-    
+
     // Collect all lab results from all patients
-    const allLabResults: any[] = [];
-    patientsData.forEach(patient => {
+    const allLabResults: LabResult[] = [];
+    patientsData.forEach((patient: Patient) => {
       const patientLabResults = clinicalDataManager.getPatientLabResults(patient.id);
       patientLabResults.forEach((result: any) => {
         allLabResults.push({
@@ -79,13 +119,13 @@ export default function ReviewLabResultsPage() {
         });
       });
     });
-    
+
     // Sort by result date (newest first)
     allLabResults.sort((a, b) => new Date(b.resultDate || b.orderDate).getTime() - new Date(a.resultDate || a.orderDate).getTime());
-    
+
     setLabResults(allLabResults);
     setFilteredResults(allLabResults);
-    
+
     // Generate notifications for new results
     const newResults = allLabResults.filter(r => !r.reviewed && r.status === 'completed');
     setNotifications(newResults.map(r => ({
@@ -94,40 +134,40 @@ export default function ReviewLabResultsPage() {
       message: `New ${r.testName} result available for ${r.patientName}`,
       timestamp: r.resultDate || r.orderDate
     })));
-    
+
     setIsLoading(false);
   }, [router]);
 
   useEffect(() => {
     // Apply filters
     let filtered = labResults;
-    
+
     if (filters.patientId) {
       filtered = filtered.filter(result => result.patientId === filters.patientId);
     }
-    
+
     if (filters.dateFrom) {
       filtered = filtered.filter(result => {
         const resultDate = new Date(result.resultDate || result.orderDate);
         return resultDate >= new Date(filters.dateFrom);
       });
     }
-    
+
     if (filters.dateTo) {
       filtered = filtered.filter(result => {
         const resultDate = new Date(result.resultDate || result.orderDate);
         return resultDate <= new Date(filters.dateTo);
       });
     }
-    
+
     if (filters.status) {
       filtered = filtered.filter(result => result.status === filters.status);
     }
-    
+
     if (filters.provider) {
       filtered = filtered.filter(result => result.providerId.includes(filters.provider));
     }
-    
+
     setFilteredResults(filtered);
   }, [filters, labResults]);
 
@@ -145,7 +185,7 @@ export default function ReviewLabResultsPage() {
     });
   };
 
-  const handleResultSelect = (result: any) => {
+  const handleResultSelect = (result: LabResult) => {
     setSelectedResult(result);
     setReviewData(prev => ({
       ...prev,
@@ -172,9 +212,9 @@ export default function ReviewLabResultsPage() {
       reviewLabResultSchema.parse(reviewData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
+        error.issues.forEach((err: z.ZodIssue) => {
           if (err.path.length > 0) {
-            errors[err.path[0]] = err.message;
+            errors[err.path[0].toString()] = err.message;
           }
         });
       }
@@ -190,28 +230,28 @@ export default function ReviewLabResultsPage() {
     try {
       // Mark result as reviewed
       const success = clinicalDataManager.reviewLabResult(reviewData.resultId, reviewData.reviewerId);
-      
+
       if (success) {
         // Update the result in our local state
-        setLabResults(prev => prev.map(result => 
-          result.id === reviewData.resultId 
+        setLabResults(prev => prev.map(result =>
+          result.id === reviewData.resultId
             ? { ...result, reviewed: true, reviewedBy: reviewData.reviewerId, reviewedAt: new Date().toISOString(), notes: reviewData.notes }
             : result
         ));
-        
+
         // Remove from notifications
         setNotifications(prev => prev.filter(n => n.id !== reviewData.resultId));
-        
+
         // Log review for audit trail
-        logClinicalAccess('review_lab_result', selectedResult.patientId, user || 'unknown');
-        
+        logClinicalAccess('review_lab_result', selectedResult?.patientId || '', session?.username || 'unknown');
+
         // Close review modal
         setIsReviewing(false);
         setSelectedResult(null);
         setReviewData({
           resultId: '',
           notes: '',
-          reviewerId: user || '',
+          reviewerId: session?.username || '',
           followUpRequired: false,
           followUpInstructions: ''
         });
@@ -222,7 +262,7 @@ export default function ReviewLabResultsPage() {
     }
   };
 
-  const handleDownloadResult = (result: any) => {
+  const handleDownloadResult = (result: LabResult) => {
     const resultData = {
       patient: {
         name: result.patientName,
@@ -242,7 +282,7 @@ export default function ReviewLabResultsPage() {
       reviewedBy: result.reviewedBy,
       reviewedAt: result.reviewedAt,
       notes: result.notes,
-      downloadedBy: user,
+      downloadedBy: session?.username,
       downloadedAt: new Date().toISOString()
     };
 
@@ -337,7 +377,7 @@ export default function ReviewLabResultsPage() {
               )}
             </div>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Review Lab Results</h1>
           <p className="text-gray-600 mt-2">
             Review and annotate lab results for accurate diagnosis and follow-up
@@ -353,7 +393,7 @@ export default function ReviewLabResultsPage() {
                 Clear All
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Patient</label>
@@ -370,7 +410,7 @@ export default function ReviewLabResultsPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Date From</label>
                 <input
@@ -380,7 +420,7 @@ export default function ReviewLabResultsPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Date To</label>
                 <input
@@ -390,7 +430,7 @@ export default function ReviewLabResultsPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select
@@ -405,7 +445,7 @@ export default function ReviewLabResultsPage() {
                   <option value="critical">Critical</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Provider</label>
                 <input
@@ -444,7 +484,7 @@ export default function ReviewLabResultsPage() {
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
                       <div>
                         <p><strong>Patient:</strong> {result.patientName}</p>
@@ -455,10 +495,10 @@ export default function ReviewLabResultsPage() {
                         <p><strong>Priority:</strong> {result.priority}</p>
                       </div>
                     </div>
-                    
+
                     {result.results && result.results.length > 0 && (
                       <div className="space-y-2 mb-4">
-                        {result.results.slice(0, 3).map((res: any, index: number) => (
+                        {result.results.slice(0, 3).map((res: TestResult, index: number) => (
                           <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                             <span className="text-sm">{res.name}</span>
                             <div className="text-right">
@@ -476,11 +516,11 @@ export default function ReviewLabResultsPage() {
                         )}
                       </div>
                     )}
-                    
+
                     {result.reviewed && (
                       <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
                         <p className="text-green-800">
-                          <strong>Reviewed by:</strong> {result.reviewedBy} on {new Date(result.reviewedAt).toLocaleDateString()}
+                          <strong>Reviewed by:</strong> {result.reviewedBy} on {new Date(result.reviewedAt || '').toLocaleDateString()}
                         </p>
                         {result.notes && (
                           <p className="text-green-700 mt-1">
@@ -490,7 +530,7 @@ export default function ReviewLabResultsPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 ml-4">
                     <Button
                       onClick={() => handleDownloadResult(result)}
@@ -501,7 +541,7 @@ export default function ReviewLabResultsPage() {
                       <Download className="w-4 h-4" />
                       <span>Download</span>
                     </Button>
-                    
+
                     {result.status === 'completed' && !result.reviewed && (
                       <Button
                         onClick={() => handleResultSelect(result)}
@@ -541,7 +581,7 @@ export default function ReviewLabResultsPage() {
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <h3 className="font-semibold text-gray-900 mb-2">{selectedResult.testName}</h3>
                     <p className="text-sm text-gray-600">
-                      <strong>Patient:</strong> {selectedResult.patientName} | 
+                      <strong>Patient:</strong> {selectedResult.patientName} |
                       <strong> Result Date:</strong> {new Date(selectedResult.resultDate).toLocaleDateString()}
                     </p>
                   </div>
@@ -549,21 +589,21 @@ export default function ReviewLabResultsPage() {
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Test Results:</h4>
                     <div className="space-y-2">
-                      {selectedResult.results.map((result: any, index: number) => (
+                      {selectedResult.results.map((testResult: TestResult, index: number) => (
                         <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <span className="text-sm">{result.name}</span>
+                          <span className="text-sm">{testResult.name}</span>
                           <div className="text-right">
                             <span className={`text-sm font-medium ${
-                              result.isAbnormal ? 'text-red-600' : 
-                              result.isCritical ? 'text-red-800' : 'text-green-600'
+                              testResult.isAbnormal ? 'text-red-600' :
+                              testResult.isCritical ? 'text-red-800' : 'text-green-600'
                             }`}>
-                              {result.value} {result.unit}
+                              {testResult.value} {testResult.unit}
                             </span>
-                            <p className="text-xs text-gray-500">{result.referenceRange}</p>
-                            {result.isAbnormal && (
+                            <p className="text-xs text-gray-500">{testResult.referenceRange}</p>
+                            {testResult.isAbnormal && (
                               <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">Abnormal</span>
                             )}
-                            {result.isCritical && (
+                            {testResult.isCritical && (
                               <span className="text-xs bg-red-100 text-red-800 px-1 rounded">Critical</span>
                             )}
                           </div>
