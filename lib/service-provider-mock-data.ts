@@ -402,7 +402,7 @@ export class ServiceProviderDataManager {
     const end = new Date(endDate);
     
     for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof WeeklySchedule;
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof WeeklySchedule;
       const daySchedule = provider.availabilitySettings.weeklySchedule[dayName];
       
       if (daySchedule.isAvailable && !provider.availabilitySettings.blockedDates.includes(date.toISOString().split('T')[0])) {

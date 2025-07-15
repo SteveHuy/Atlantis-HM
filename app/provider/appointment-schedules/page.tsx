@@ -550,7 +550,7 @@ export default function AccessAppointmentSchedulesPage() {
               <Button
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => alert('Add appointment functionality would be implemented here')}
+                onClick={() => router.push('/patient/schedule-appointment')}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Appointment
