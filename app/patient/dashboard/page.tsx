@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, User, Settings, LogOut, FileText, Calendar, CreditCard, Shield } from "lucide-react";
+import { Bell, User, Settings, LogOut, FileText, Calendar, CreditCard, MessageSquare, Shield } from "lucide-react";
 import { mockPatient, dashboardFeatures } from "@/lib/mockDashboardData";
 import { dashboardLogger } from "@/lib/logger";
 
@@ -64,6 +64,9 @@ export default function PatientDashboard() {
 
   const handleFeatureSelect = (featureId: string) => {
     switch (featureId) {
+      case 'messages':
+        router.push('/patient/messages');
+        break;
       case 'appointment-history':
         router.push('/patient/appointment-history');
         break;
@@ -89,14 +92,14 @@ export default function PatientDashboard() {
       requirementRef: feature.requirementRef
     });
 
-    // Handle medical records feature
-    if (feature.id === 'medical-records') {
-      router.push('/patient/medical-records');
-      return;
-    }
-
-    // Handle other implemented features
+    // Handle implemented features
     switch (feature.id) {
+      case 'messages':
+        router.push('/patient/messages');
+        break;
+      case 'medical-records':
+        router.push('/patient/medical-records');
+        break;
       case 'appointment-history':
         router.push('/patient/appointment-history');
         break;
@@ -174,6 +177,13 @@ export default function PatientDashboard() {
                       <Settings className="h-4 w-4 mr-3" />
                       Manage profile
                     </Link>
+                    <Link
+                      href="/patient/insurance-details"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <Shield className="h-4 w-4 mr-3" />
+                      Insurance Details
+                    </Link>
                     <button
                       onClick={() => dashboardLogger.logDashboardEvent('logout_intent_header')}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -232,9 +242,11 @@ export default function PatientDashboard() {
                         feature.color === 'indigo' ? 'bg-indigo-100 text-indigo-600' :
                         'bg-gray-100 text-gray-600'
                       }`}>
+                        {feature.icon === 'MessageSquare' && <MessageSquare className="w-5 h-5" />}
                         {feature.icon === 'FileText' && <FileText className="w-5 h-5" />}
                         {feature.icon === 'Calendar' && <Calendar className="w-5 h-5" />}
                         {feature.icon === 'Bell' && <Bell className="w-5 h-5" />}
+                        {feature.icon === 'Shield' && <Shield className="w-5 h-5" />}
                         {feature.icon === 'CreditCard' && <CreditCard className="w-5 h-5" />}
                         {feature.icon === 'Shield' && <Shield className="w-5 h-5" />}
                       </div>

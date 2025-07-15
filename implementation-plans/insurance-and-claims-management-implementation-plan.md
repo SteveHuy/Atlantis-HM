@@ -1,281 +1,276 @@
-# Userdoc Implementation Plan
+Userdoc Implementation Plan
 
-## Overview
-This implementation plan covers the Insurance and Claims Management features for the healthcare management system. The features enable patients to submit insurance details, receptionists and service providers to verify coverage, submit claims, and track claim status.
+ 
+1. #Submit Insurance Details
 
-# 1. Insurance Data Model and Infrastructure Setup
+ 
+High-Level Steps
 
-## Database Schema Design
-- Create insurance provider table with predefined list of providers
-- Create patient insurance details table (provider_id, policy_number, status, verification_date)
-- Create insurance claims table (claim_id, patient_id, encounter_id, amount, status, submission_date)
-- Create claim status history table for tracking status changes
-- Create insurance eligibility cache table for storing verification results
+    Add "Insurance Details" menu option in the Patient's top-right user dropdown.
+    Create an "Insurance Details" form page:
+        Heading: "Insurance Details"
+        Fields: Provider (dropdown with mock data), Policy Number (text input)
+        'Submit' button
+    Implement form validation using zod:
+        Ensure provider is selected and policy number is not empty.
+        Display inline validation feedback.
+    On successful validation:
+        Simulate API call to submit data (use mock data and delay for realism).
+        Show confirmation: "Insurance details submitted for verification."
+        Redirect to Patient Dashboard.
+    Add test cases to check form validation, happy path, and error states.
+    Add corresponding logic for replacing references in the codebase (search for "UD-REF: #Submit Insurance Details", replace with actual implementation).
 
-## Mock Data Setup
-- Populate insurance providers list with common providers (Blue Cross, Aetna, UnitedHealth, etc.)
-- Create mock insurance verification API responses for different scenarios
-- Generate sample claim IDs and tracking numbers
-- Create mock claim status transitions (submitted → processing → approved/denied)
-- Set up mock eligibility check responses with coverage limits and copay information
+Technical Considerations
 
-## API Integration Foundation
-- Set up mock insurance verification endpoints
-- Create mock claim submission endpoints (HIPAA 5010 format simulation)
-- Implement mock real-time eligibility checking service
-- Create webhook simulation for claim status updates
+ 
+Input Validation & Security
 
-## Security and Authorization
-- Implement role-based access control for insurance features
-- Ensure patient data encryption for insurance information
-- Add audit trail logging for all insurance-related actions
-- Implement secure storage for policy numbers and sensitive data
+    Use client-side zod schema validation for form data.
+    Sanitize all outputs and error feedback.
+    Do not save to real database yet—use mock data/state for UI validation.
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #feature A)
+UI/UX
 
-# 2. #Submit Insurance Details
+    Follow shadcn/ui and Tailwind CSS for input elements and feedback.
+    Use accessible ARIA roles for form elements and status messages.
 
-## UI Implementation
-- Add "Insurance Details" menu item to patient dropdown navigation
-- Create insurance details form page with validation
-- Implement provider dropdown with search functionality
-- Add policy number input with format validation
+Referenced Stories
 
-## Form Validation and Submission
-- Client-side validation for required fields
-- Policy number format validation based on selected provider
-- Mock API call for insurance submission
-- Success/error message display components
+    If #Patient Dashboard is referenced, check if implemented. If not, leave a comment: UD-REF: #Patient Dashboard.
 
-## State Management
-- Store insurance submission status in global state
-- Cache submitted insurance details for future reference
-- Handle loading states during submission
+ 
+2. #Submit Insurance Claims
 
-## Navigation Flow
-- Implement redirect to Patient Dashboard after successful submission
-- Add breadcrumb navigation for better UX
-- Handle back navigation properly
+ 
+High-Level Steps
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #Patient Dashboard)
+    Create the Claim Submission Interface for Receptionists:
+        Auto-filled Patient details (use mock patient data).
+        Encounter Info (dropdown, populated from mock encounters).
+        Charges field (currency input).
+    Add "Submit Claim" button with:
+        zod/similar schema validation for all fields.
+        Real-time inline field validation and error display.
+    On successful submission:
+        Simulate formatting the claim using a standard (mock HIPAA 5010–styled JSON/XML object).
+        Mock API call to "submit" the claim.
+        Show confirmation message on success; error message on failure.
+        Save to mock claims list.
+    Update mock audit trail state with submission action.
+    Notify user via in-page alert/message about submission.
+    After success, redirect to #Track Claim Status.
+    Search the codebase and replace any "UD-REF: #Submit Insurance Claims" with the completed implementation.
 
-# 3. #Verify Insurance on Registration
+Technical Considerations
 
-## Integration with Registration Flow
-- Modify registration workflow to include insurance verification step
-- Create insurance verification component for receptionist interface
-- Add conditional logic to show/hide verification based on patient type
+ 
+Input Security & Validation
 
-## Real-time Verification
-- Implement mock insurance database connection
-- Create verification status indicators (active/inactive/invalid)
-- Add detailed error messages for failed verifications
-- Implement retry mechanism for failed verifications
+    Strong field validation, currency normalization, prevent empty/invalid submissions.
+    Use consistent error reporting patterns as per guidelines.
 
-## User Experience Considerations
-- Add loading spinner during verification process
-- Provide clear visual feedback for verification status
-- Allow skip option for patients without insurance
-- Save partial registration data if verification fails
+Audit Trail
 
-## Audit and Compliance
-- Log all verification attempts with timestamps
-- Store verification results in patient records
-- Track receptionist actions for compliance
+    For this UI mock, simply log/subtract in in-memory audit state.
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #Receptionist-Assisted Registration)
+Redirection/Navigation
 
-# 4. #Submit Insurance Claims
+    Use Next.js navigation after claim submission.
 
-## Claim Submission Interface
-- Create claim submission form for receptionists
-- Auto-populate patient details from existing records
-- Implement encounter dropdown with filtering
-- Add currency input with validation for charges
+Referenced Stories
 
-## Electronic Claim Formatting
-- Mock HIPAA 5010 format generation
-- Create claim data validation rules
-- Implement claim preview functionality
-- Add claim correction capabilities
+    Check if #Track Claim Status is implemented. If not, add UD-REF: #Track Claim Status.
 
-## Submission Workflow
-- Implement claim validation before submission
-- Create submission confirmation dialogs
-- Generate unique claim reference numbers
-- Send notification upon successful submission
+ 
+3. #Verify Insurance on Registration
 
-## Error Handling
-- Comprehensive error messages for validation failures
-- Retry mechanism for network failures
-- Save draft claims for later submission
-- Log all submission attempts
+ 
+High-Level Steps
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #Track Claim Status)
+    During patient registration (Receptionist flow), include an insurance verification section:
+        Provider (dropdown with mock values)
+        Policy Number (text input)
+        'Verify' button
+    On "Verify":
+        Validate both fields are filled.
+        Show inline error feedback if invalid/missing.
+    If valid, simulate a verification request (mock API with real-time status: active/inactive/invalid).
+    Show real-time status:
+        If "active": show success, allow registration continuation, mark patient insurance as "active" (mock).
+        If "inactive"/"invalid": show detailed error message, allow corrections or skip.
+    Log verification attempts in a mock audit trail.
+    Redirect back to #Receptionist-Assisted Registration or advance registration process.
+    Search codebase for "UD-REF: #Verify Insurance on Registration" and update as required.
 
-# 5. #Track Claim Status
+Technical Considerations
 
-## Search and Filter Interface
-- Create claim search component with multiple criteria
-- Implement real-time search functionality
-- Add advanced filtering options (date range, amount range)
-- Create saved search functionality
+ 
+Real-Time Feedback
 
-## Claim List Display
-- Design responsive claim list table
-- Implement sortable columns
-- Add pagination with configurable page size
-- Create claim status badges with colors
+    Use loading indicators during mock API verification.
+    Show clear, distinct statuses using accessible component patterns.
 
-## Claim Details View
-- Expandable claim details panel
-- Display complete claim history
-- Show payer responses and rejection reasons
-- Add print/export functionality
+Audit Logging
 
-## Real-time Updates
-- Implement mock webhook listener for status updates
-- Create notification system for status changes
-- Update UI automatically when status changes
-- Add refresh functionality
+    Log verification state to in-memory logs for mock/demo.
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #Manage Rejections and Appeals)
+Referenced Stories
 
-# 6. #Review Insurance Eligibility
+    Check if #Receptionist-Assisted Registration is present. If not, add UD-REF: #Receptionist-Assisted Registration.
 
-## Service Provider Interface
-- Create eligibility check component for providers
-- Add quick access from patient encounter screen
-- Implement service code lookup functionality
-- Add favorite services for quick selection
+ 
+4. #Track Claim Status
 
-## Real-time Eligibility Checking
-- Mock insurance API integration
-- Display comprehensive coverage information
-- Show remaining benefits and limits
-- Calculate patient responsibility
+ 
+High-Level Steps
 
-## Coverage Details Display
-- Create clear visualization of coverage limits
-- Display copay and deductible information
-- Show pre-authorization requirements
-- Add coverage effective dates
+    Create claim tracking UI for Receptionists:
+        Search by Claim ID or Patient ID (inputs).
+        "Search" button triggers mock claim fetch.
+    Show results in a table:
+        Columns: Claim ID, Date Submitted, Status, Amount.
+        Support pagination, result count, and page track.
+    Allow sorting by Status and Date Submitted (column header click).
+    Filtering dropdown for claim status.
+    Show status changes in real-time (simulate with occasional state updates).
+    "View Details" expands/collapses claim row, with payer/rejection info if relevant.
+    Log search/view in audit trail.
+    Allow claim updates/required actions inline.
+    On managing rejected claims, redirect to #Manage Rejections and Appeals as needed.
+    Update codebase, replacing "UD-REF: #Track Claim Status" references.
 
-## Alternative Payment Options
-- Implement self-pay workflow for non-covered services
-- Add payment plan options
-- Create cost estimation tools
-- Generate receipts for self-pay
+Technical Considerations
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #feature A)
+ 
+UI Patterns and Accessibility
 
-# 7. #Process Claim Submissions
+    Use shadcn/ui Table, Dropdown, and Pagination components.
+    Support keyboard navigation.
 
-## Enhanced Claim Processing
-- Create batch claim submission capability
-- Implement claim validation queue
-- Add bulk editing functionality
-- Create claim templates for common procedures
+Real-Time Status Simulation
 
-## Integration with EHR
-- Auto-populate service codes from encounters
-- Link diagnoses to claims automatically
-- Validate procedure-diagnosis combinations
-- Sync claim data with patient records
+    Use mock websocket or timed state updates to demonstrate dynamic updates.
 
-## Payer Communication
-- Mock payer-specific submission rules
-- Implement payer response handling
-- Create resubmission workflow
-- Add payer contact information
+Data Mocking
 
-## Performance Optimization
-- Implement claim caching for draft saves
-- Add background processing for large batches
-- Create progress indicators for bulk operations
-- Optimize database queries for claim retrieval
+    Implement a robust set of mock claims (with all statuses) and patient datasets.
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #Track Claim Status)
+Referenced Stories
 
-# 8. #View Insurance Claims
+    Check if #Manage Rejections and Appeals is implemented; if not, add UD-REF: #Manage Rejections and Appeals.
 
-## Patient Portal Integration
-- Add claims section to patient dashboard
-- Create patient-friendly claim status descriptions
-- Implement claim history timeline view
-- Add claim amount breakdown
+ 
+5. #Review Insurance Eligibility
 
-## Search and Filter for Patients
-- Simplified search interface for patients
-- Date-based filtering options
-- Status-based filtering
-- Amount range filtering
+ 
+High-Level Steps
 
-## Claim Documentation
-- PDF generation for claim summaries
-- Downloadable claim history reports
-- Email claim details functionality
-- Print-friendly claim views
+    Add "Eligibility Verification" interface for Service Providers:
+        Patient Insurance Info (text, required)
+        Service Date (date, required)
+    'Check Eligibility' button:
+        Form validated with zod.
+        Simulate API checking eligibility (mock: active, inactive, coverage details).
+    On response, show:
+        Status, Limit, Co-pay/deductible info.
+        If eligible: show "Eligible for Service"; enable next service actions.
+        If not: show "Service Not Covered"; provide prompt for self-pay/alternative.
+    Allow printing or downloading eligibility summary (PDF/download as text).
+    Log result in mock patient record audit trail.
+    Display historical verification attempts.
+    Update "UD-REF: #Review Insurance Eligibility" in the codebase.
 
-## Patient Communication
-- Add claim status notifications
-- Create in-app messaging for claim questions
-- Implement claim dispute functionality
-- Add educational content about claims
+Technical Considerations
 
-For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #Patient Dashboard)
+ 
+Security & Data Handling
 
-# 9. System Integration and Testing
+    Sensitive patient info must be simulated only (never real).
+    Downloaded/printed files to omit identifying details for privacy during mock/demo.
 
-## Cross-Feature Integration
-- Ensure smooth data flow between all insurance features
-- Implement shared components for consistency
-- Create unified notification system
-- Synchronize status updates across features
+Integration
 
-## Performance Optimization
-- Implement caching for frequently accessed data
-- Optimize database queries with proper indexing
-- Add lazy loading for large claim lists
-- Implement request debouncing for searches
+    Abstract insurance API simulation through a shared utilities layer (lib/).
 
-## Security Hardening
-- Implement rate limiting for API calls
-- Add request validation at all endpoints
-- Encrypt sensitive data in transit and at rest
-- Implement session timeout for sensitive operations
+ 
+6. #Process Claim Submissions
 
-## Mock Data Replacement Strategy
-- Document all mock endpoints for future replacement
-- Create integration test suite for real API migration
-- Implement feature flags for gradual rollout
-- Plan for data migration from mock to real systems
+ 
+High-Level Steps
 
-# 10. Final Implementation Steps
+    Allow service provider to select patient and claim (from mock lists).
+    Show claim form with prefilled details from mock EHR/Insurance Claims Table.
+    Support claim editing (dates, codes, amounts).
+        Use zod for robust validation.
+    "Submit" triggers:
+        Validate input; format for transmission.
+        Simulate electronic claim submission to payer (mock API).
+        Confirm submission, show claim ref number.
+        Save submission to in-memory claims list.
+    After submission:
+        Show real-time claim status as it updates.
+        Errors prompt corrections and allow resubmission.
+        Update history for each patient with claim results.
+        Redirect to #Track Claim Status post-processing.
+    Update "UD-REF: #Process Claim Submissions" strings in codebase appropriately.
 
-## Code Cleanup
-- Search entire codebase from root for "UD-REF: #Submit Insurance Details" and replace with implemented features
-- Search entire codebase from root for "UD-REF: #Submit Insurance Claims" and replace with implemented features
-- Search entire codebase from root for "UD-REF: #Verify Insurance on Registration" and replace with implemented features
-- Search entire codebase from root for "UD-REF: #Track Claim Status" and replace with implemented features
-- Search entire codebase from root for "UD-REF: #Review Insurance Eligibility" and replace with implemented features
-- Search entire codebase from root for "UD-REF: #Process Claim Submissions" and replace with implemented features
-- Search entire codebase from root for "UD-REF: #View Insurance Claims" and replace with implemented features
+Technical Considerations
 
-## Documentation
-- Create API documentation for all insurance endpoints
-- Document mock data structures and responses
-- Add user guides for each feature
-- Create troubleshooting guide for common issues
+ 
+Data Consistency
 
-## Deployment Preparation
-- Set up environment variables for insurance APIs
-- Configure feature flags for gradual rollout
-- Create monitoring dashboards for claim processing
-- Set up alerts for failed submissions
+    Always keep claim lists in sync across roles by updating shared mock data/state.
 
-## Post-Deployment Monitoring
-- Monitor claim submission success rates
-- Track insurance verification performance
-- Analyze user interaction patterns
-- Collect feedback for improvements
+Error Simulation
+
+    Simulate status transitions (e.g., submitted → processed → paid/denied) for demo.
+
+Referenced Stories
+
+    Ensure #Track Claim Status is referenced/implemented; add UD-REF: #Track Claim Status if not.
+
+ 
+7. #View Insurance Claims
+
+ 
+High-Level Steps
+
+    For Patients: create "Insurance Claims" viewing UI:
+        Heading: "Insurance Claims"
+        List of claims with: ID, Date, Amount, Status
+        Dropdown for status filtering; search bar for ID/Date.
+        Allow sorting by columns (click).
+    Clicking a claim expands for detail:
+        Patient Details (read-only)
+        Encounter Info and Billing Codes
+        Download summary as PDF (simulate download).
+    'Back' button returns to #Patient Dashboard.
+    Simulate real-time status updates if available.
+    Update "UD-REF: #View Insurance Claims" strings in codebase.
+
+Technical Considerations
+
+ 
+Security & Data Privacy
+
+    Claims summary must exclude sensitive identifiers for mock/demo PDF.
+
+UI and State
+
+    Render with shadcn/table, responsive for mobile/desktop.
+
+Referenced Stories
+
+    #Patient Dashboard: check existence, otherwise note UD-REF: #Patient Dashboard.
+
+ 
+8. Cross-story Search & Reference Handling
+
+ 
+High-Level Steps
+
+    For any referenced stories (via a #) not in this plan, search the codebase to see if it has already been implemented, and leverage if it has. Otherwise, leave the appropriate comment (UD-REF: #feature A) at the relevant places.
+
+ 
+End of Change Set.

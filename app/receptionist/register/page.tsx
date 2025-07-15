@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 // Simple select will be rendered as HTML select
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, XCircle, Shield, AlertTriangle } from 'lucide-react';
 import { 
   receptionistAssistedRegistrationSchema, 
   type ReceptionistAssistedRegistrationData,
@@ -37,6 +37,16 @@ export default function ReceptionistAssistedRegistrationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState('');
+  
+  // Insurance verification state
+  const [policyNumber, setPolicyNumber] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<{
+    status: 'active' | 'inactive' | 'invalid';
+    message: string;
+    timestamp: string;
+  } | null>(null);
+  const [auditTrail, setAuditTrail] = useState<string[]>([]);
   
   // Check if receptionist is logged in
   const [receptionistSession] = useState(() => {
@@ -118,6 +128,8 @@ export default function ReceptionistAssistedRegistrationPage() {
         email: formData.email,
         phone: formData.phone,
         insuranceProvider: formData.insuranceProvider || undefined,
+        policyNumber: policyNumber || undefined,
+        insuranceStatus: verificationResult?.status || undefined,
         isVerified: false, // Patient needs to verify email
         registeredBy: receptionistSession.userId
       });
@@ -164,6 +176,77 @@ export default function ReceptionistAssistedRegistrationPage() {
   };
 
   const passwordAnalysis = getPasswordStrength(formData.password);
+
+  const handleInsuranceVerification = async () => {
+    if (!formData.insuranceProvider || !policyNumber) {
+      setErrors(prev => ({
+        ...prev,
+        insurance: 'Both insurance provider and policy number are required for verification'
+      }));
+      return;
+    }
+
+    setIsVerifying(true);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.insurance;
+      return newErrors;
+    });
+
+    try {
+      // Simulate API call to verify insurance
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mock verification logic
+      const isExpired = policyNumber.toLowerCase().includes('expired');
+      const isInvalid = policyNumber.toLowerCase().includes('invalid');
+      
+      let result: typeof verificationResult;
+      
+      if (isInvalid) {
+        result = {
+          status: 'invalid',
+          message: 'Policy number not found in insurance database. Please verify details.',
+          timestamp: new Date().toISOString()
+        };
+      } else if (isExpired) {
+        result = {
+          status: 'inactive',
+          message: 'Policy is inactive or expired. Patient should contact insurance provider.',
+          timestamp: new Date().toISOString()
+        };
+      } else {
+        result = {
+          status: 'active',
+          message: 'Insurance coverage verified successfully. Registration can proceed.',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      setVerificationResult(result);
+      
+      // Add to audit trail
+      const auditEntry = `${new Date().toLocaleString()}: Insurance verification for ${formData.insuranceProvider} policy ${policyNumber} - Status: ${result.status}`;
+      setAuditTrail(prev => [...prev, auditEntry]);
+      
+      // Log audit event
+      mockDataManager.addAuditLogEntry({
+        userId: receptionistSession.userId,
+        userRole: 'receptionist',
+        action: 'INSURANCE_VERIFICATION',
+        details: auditEntry
+      });
+
+    } catch (error) {
+      setVerificationResult({
+        status: 'invalid',
+        message: 'Verification service temporarily unavailable. Please try again.',
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -270,7 +353,12 @@ export default function ReceptionistAssistedRegistrationPage() {
                 <select
                   id="insuranceProvider"
                   value={formData.insuranceProvider} 
-                  onChange={(e) => handleInputChange('insuranceProvider', e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange('insuranceProvider', e.target.value);
+                    // Reset verification when provider changes
+                    setVerificationResult(null);
+                    setPolicyNumber('');
+                  }}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="">Select insurance provider (optional)</option>
@@ -281,6 +369,102 @@ export default function ReceptionistAssistedRegistrationPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Insurance Verification Section */}
+              {formData.insuranceProvider && (
+                <Card className="border-blue-200 bg-blue-50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <Shield className="h-5 w-5 mr-2 text-blue-600" />
+                      Insurance Verification
+                    </CardTitle>
+                    <CardDescription>
+                      Verify patient's insurance information during registration to ensure coverage and reduce claim denials.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Policy Number */}
+                    <div className="space-y-2">
+                      <Label htmlFor="policyNumber">Policy Number *</Label>
+                      <Input
+                        id="policyNumber"
+                        value={policyNumber}
+                        onChange={(e) => {
+                          setPolicyNumber(e.target.value);
+                          setVerificationResult(null); // Reset verification when policy changes
+                        }}
+                        placeholder="Enter policy number"
+                        className={errors.insurance ? 'border-red-500' : ''}
+                      />
+                      {errors.insurance && (
+                        <p className="text-sm text-red-600">{errors.insurance}</p>
+                      )}
+                    </div>
+
+                    {/* Verify Button */}
+                    <Button
+                      type="button"
+                      onClick={handleInsuranceVerification}
+                      disabled={isVerifying || !formData.insuranceProvider || !policyNumber}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      {isVerifying ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="h-4 w-4 mr-2" />
+                          Verify Insurance
+                        </>
+                      )}
+                    </Button>
+
+                    {/* Verification Result */}
+                    {verificationResult && (
+                      <Alert className={
+                        verificationResult.status === 'active' 
+                          ? 'border-green-200 bg-green-50' 
+                          : 'border-red-200 bg-red-50'
+                      }>
+                        {verificationResult.status === 'active' ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-red-600" />
+                        )}
+                        <AlertDescription className={
+                          verificationResult.status === 'active' ? 'text-green-800' : 'text-red-800'
+                        }>
+                          <div className="font-semibold mb-1">
+                            Status: {verificationResult.status.toUpperCase()}
+                          </div>
+                          {verificationResult.message}
+                          <div className="text-xs mt-2 opacity-75">
+                            Verified at: {new Date(verificationResult.timestamp).toLocaleString()}
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Alternative Options for Inactive/Invalid */}
+                    {verificationResult && verificationResult.status !== 'active' && (
+                      <Alert className="border-yellow-200 bg-yellow-50">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        <AlertDescription className="text-yellow-800">
+                          <div className="font-semibold mb-1">Available Options:</div>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            <li>Re-enter insurance details and try verification again</li>
+                            <li>Skip verification and proceed with registration</li>
+                            <li>Patient can update insurance information after registration</li>
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Username */}
               <div className="space-y-2">

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Shield, ExternalLink, DollarSign } from "lucide-react";
 import { mockInsuranceClaims } from "@/lib/mockDashboardData";
 import { dashboardLogger } from "@/lib/logger";
+import { useRouter } from "next/navigation";
 
 const statusColors = {
   Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -13,16 +14,17 @@ const statusColors = {
 };
 
 export function ClaimStatus() {
+  const router = useRouter();
   const recentClaims = mockInsuranceClaims.slice(0, 3);
 
   const handleViewClaim = (claimId: string) => {
     dashboardLogger.logDashboardEvent('view_insurance_claim', { claimId });
-    alert("UD-REF: #View Insurance Claims - will be implemented in future epic");
+    router.push('/patient/insurance-claims');
   };
 
   const handleViewAllClaims = () => {
     dashboardLogger.logDashboardEvent('view_all_insurance_claims');
-    alert("UD-REF: #View Insurance Claims - will be implemented in future epic");
+    router.push('/patient/insurance-claims');
   };
 
   return (
@@ -79,9 +81,9 @@ export function ClaimStatus() {
           <Button 
             className="mt-4" 
             variant="outline"
-            onClick={() => alert("UD-REF: #Submit Insurance Details - will be implemented in future epic")}
+            onClick={() => router.push('/patient/insurance-details')}
           >
-            Submit New Claim
+            Submit Insurance Details
           </Button>
         </div>
       )}
