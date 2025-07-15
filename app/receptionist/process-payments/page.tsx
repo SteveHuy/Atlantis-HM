@@ -137,8 +137,7 @@ export default function ProcessPaymentsPage() {
         
         // Auto-redirect to Generate Patient Statements after 3 seconds
         setTimeout(() => {
-          // UD-REF: #Generate Patient Statements - will be implemented in future epic
-          console.log('Redirecting to Generate Patient Statements...');
+          router.push('/receptionist/generate-statements');
         }, 3000);
         
       } else {

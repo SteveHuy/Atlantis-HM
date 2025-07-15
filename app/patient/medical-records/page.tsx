@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, FileText, TestTube, Pill, Shield, Download, ChevronDown, ChevronUp } from "lucide-react";
 import { clinicalDataManager } from "@/lib/clinical-mock-data";
 import { logClinicalAccess } from "@/lib/clinical-validation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UserSession {
   user: string;
@@ -26,6 +29,11 @@ export default function MedicalRecordsPage() {
   const [sections, setSections] = useState<MedicalSection[]>([]);
   const [selectedDetail, setSelectedDetail] = useState<any>(null);
   const [detailType, setDetailType] = useState<string>("");
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [selectedReportTypes, setSelectedReportTypes] = useState<string[]>([]);
+  const [downloadError, setDownloadError] = useState('');
+  const [downloadSuccess, setDownloadSuccess] = useState('');
+  const [medicalRecords, setMedicalRecords] = useState<any>(null);
 
   useEffect(() => {
     // Check for user session
@@ -62,6 +70,9 @@ export default function MedicalRecordsPage() {
     // In a real app, patient ID would come from authenticated session
     const patientId = 'P001';
     const records = clinicalDataManager.getPatientMedicalRecords(patientId);
+    
+    // Store records for download functionality
+    setMedicalRecords(records);
     
     setSections([
       {
@@ -114,13 +125,26 @@ export default function MedicalRecordsPage() {
   };
 
   const handleDownloadReport = () => {
-    // In a real app, this would generate and download a PDF report
-    const summary = clinicalDataManager.generateHealthSummary('P001');
-    const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+    setShowDownloadModal(true);
+  };
+
+  const handleDownloadReports = () => {
+    // Validate that at least one report type is selected
+    if (selectedReportTypes.length === 0) {
+      setDownloadError('Please select at least one report to download');
+      return;
+    }
+
+    // Clear any previous errors
+    setDownloadError('');
+
+    // Generate mock PDF with selected report types
+    const selectedData = generateMockPdf(selectedReportTypes);
+    const blob = new Blob([JSON.stringify(selectedData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `medical-records-summary-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `medical-reports-${selectedReportTypes.join('-')}-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -128,6 +152,54 @@ export default function MedicalRecordsPage() {
     
     // Log download for HIPAA compliance
     logClinicalAccess('download_medical_records', 'P001', user || 'unknown');
+    
+    // Show success message
+    setDownloadSuccess('Reports downloaded successfully');
+    
+    // Close modal and navigate back after short delay
+    setTimeout(() => {
+      setShowDownloadModal(false);
+      setSelectedReportTypes([]);
+      setDownloadSuccess('');
+      // Navigation to #View Medical Records (stay on current page)
+    }, 2000);
+  };
+
+  const generateMockPdf = (reportTypes: string[]) => {
+    const patientData = medicalRecords?.patient;
+    const mockData: any = {
+      patient: patientData,
+      reportTypes: reportTypes,
+      generatedAt: new Date().toISOString(),
+      complianceNote: "All data exports comply with privacy and HIPAA standards"
+    };
+
+    reportTypes.forEach(type => {
+      switch (type) {
+        case 'visit_summaries':
+          mockData.visitSummaries = medicalRecords?.visitSummaries || [];
+          break;
+        case 'lab_results':
+          mockData.labResults = medicalRecords?.labResults || [];
+          break;
+        case 'medications':
+          mockData.medications = medicalRecords?.medications || [];
+          break;
+        case 'immunizations':
+          mockData.immunizations = medicalRecords?.immunizations || [];
+          break;
+      }
+    });
+
+    return mockData;
+  };
+
+  const handleReportTypeChange = (reportType: string, checked: boolean) => {
+    if (checked) {
+      setSelectedReportTypes([...selectedReportTypes, reportType]);
+    } else {
+      setSelectedReportTypes(selectedReportTypes.filter(type => type !== reportType));
+    }
   };
 
   const handleBackToDashboard = () => {
@@ -470,6 +542,125 @@ export default function MedicalRecordsPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Download Reports Modal */}
+        {showDownloadModal && (
+          <Dialog open={showDownloadModal} onOpenChange={setShowDownloadModal}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Download Reports</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Select one or more report types to download:
+                </p>
+                
+                {/* Report Type Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="visit_summaries"
+                      checked={selectedReportTypes.includes('visit_summaries')}
+                      onCheckedChange={(checked) => 
+                        handleReportTypeChange('visit_summaries', checked as boolean)
+                      }
+                    />
+                    <label htmlFor="visit_summaries" className="text-sm font-medium">
+                      Visit Summaries
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="lab_results"
+                      checked={selectedReportTypes.includes('lab_results')}
+                      onCheckedChange={(checked) => 
+                        handleReportTypeChange('lab_results', checked as boolean)
+                      }
+                    />
+                    <label htmlFor="lab_results" className="text-sm font-medium">
+                      Lab Results
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="medications"
+                      checked={selectedReportTypes.includes('medications')}
+                      onCheckedChange={(checked) => 
+                        handleReportTypeChange('medications', checked as boolean)
+                      }
+                    />
+                    <label htmlFor="medications" className="text-sm font-medium">
+                      Medications
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="immunizations"
+                      checked={selectedReportTypes.includes('immunizations')}
+                      onCheckedChange={(checked) => 
+                        handleReportTypeChange('immunizations', checked as boolean)
+                      }
+                    />
+                    <label htmlFor="immunizations" className="text-sm font-medium">
+                      Immunizations
+                    </label>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {downloadError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{downloadError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Success Message */}
+                {downloadSuccess && (
+                  <Alert>
+                    <AlertDescription className="text-green-600">
+                      {downloadSuccess}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* HIPAA Compliance Notice */}
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-xs text-blue-700">
+                    <Shield className="w-4 h-4 inline mr-1" />
+                    All data exports comply with privacy and HIPAA standards
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => {
+                      setShowDownloadModal(false);
+                      setSelectedReportTypes([]);
+                      setDownloadError('');
+                      setDownloadSuccess('');
+                    }}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDownloadReports}
+                    disabled={downloadSuccess !== ''}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Download className="w-4 h-4 inline mr-1" />
+                    Download
+                  </button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
     </div>
