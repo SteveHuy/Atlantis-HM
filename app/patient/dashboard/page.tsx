@@ -177,6 +177,13 @@ export default function PatientDashboard() {
                       <Settings className="h-4 w-4 mr-3" />
                       Manage profile
                     </Link>
+                    <Link
+                      href="/patient/insurance-details"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <Shield className="h-4 w-4 mr-3" />
+                      Insurance Details
+                    </Link>
                     <button
                       onClick={() => dashboardLogger.logDashboardEvent('logout_intent_header')}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
