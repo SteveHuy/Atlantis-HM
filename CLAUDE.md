@@ -101,7 +101,7 @@ So for the Patient Login, the correct approach would be:
 2. Search for existing `UD-REF: #Patient Dashboard` comments
 3. Follow the complete implementation process above
 4. Connect all previously deferred functionality
-    
+
 Please autonomously complete these tasks, ensuring you retrieve the requirements and implement.
 
 Make sure to make frequent git commits with descriptive messages as you go through
