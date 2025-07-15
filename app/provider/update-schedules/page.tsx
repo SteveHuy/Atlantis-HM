@@ -250,7 +250,7 @@ export default function UpdateProviderSchedulesPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(e => e.message).join(', ');
+        const errors = validationResult.error.issues.map(e => e.message).join(', ');
         setSaveError(errors);
         setIsSaving(false);
         return;
