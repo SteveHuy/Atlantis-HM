@@ -11,20 +11,17 @@ import { sessionManager } from "@/lib/epic3-mock-data";
 
 export default function PatientBillingInfoPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ username: string; role: string; firstName: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState<BillingTransaction[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<BillingTransaction | null>(null);
 
   useEffect(() => {
     const session = sessionManager.getSession();
-    if (!session || session.role !== 'patient') {
-      router.push('/patient/login');
-      return;
-    }
-    
-    setUser(session);
-    
+    // if (!session || session.role !== 'patient') {
+    //   router.push('/patient/login');
+    //   return;
+    // }
+
     // Load patient billing transactions
     const patientTransactions = billingDataManager.getBillingTransactions('P001'); // Mock patient ID
     setTransactions(patientTransactions);
@@ -149,7 +146,7 @@ For questions about this bill, please contact our billing department.`;
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -163,7 +160,7 @@ For questions about this bill, please contact our billing department.`;
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -234,7 +231,7 @@ For questions about this bill, please contact our billing department.`;
             <CardHeader>
               <CardTitle>Transaction Details</CardTitle>
               <CardDescription>
-                {selectedTransaction 
+                {selectedTransaction
                   ? `Details for ${selectedTransaction.serviceType}`
                   : 'Select a transaction to view details'
                 }

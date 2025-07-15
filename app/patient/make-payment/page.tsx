@@ -13,13 +13,13 @@ export default function MakePaymentPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ username: string; role: string; firstName: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Payment form state
   const [outstandingBalances, setOutstandingBalances] = useState<OutstandingBalance[]>([]);
   const [selectedBalances, setSelectedBalances] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'Credit Card' | 'ACH Transfer'>('Credit Card');
   const [showCvv, setShowCvv] = useState(false);
-  
+
   // Form fields
   const [formData, setFormData] = useState({
     cardNumber: '',
@@ -30,7 +30,7 @@ export default function MakePaymentPage() {
     routingNumber: '',
     accountType: 'Checking' as 'Checking' | 'Savings'
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -40,14 +40,15 @@ export default function MakePaymentPage() {
   } | null>(null);
 
   useEffect(() => {
-    const session = sessionManager.getSession();
-    if (!session || session.role !== 'patient') {
-      router.push('/patient/login');
-      return;
-    }
-    
-    setUser(session);
-    
+    // const session = sessionManager.getSession();
+    // console.log("Session: ", session);
+    // if (!session || session.role !== 'patient') {
+    //   router.push('/patient/login');
+    //   return;
+    // }
+
+    // setUser(session);
+
     // Load outstanding balances for the patient
     const balances = billingDataManager.getOutstandingBalances('P001'); // Using mock patient ID
     setOutstandingBalances(balances);
@@ -55,8 +56,8 @@ export default function MakePaymentPage() {
   }, [router]);
 
   const handleBalanceSelection = (balanceId: string) => {
-    setSelectedBalances(prev => 
-      prev.includes(balanceId) 
+    setSelectedBalances(prev =>
+      prev.includes(balanceId)
         ? prev.filter(id => id !== balanceId)
         : [...prev, balanceId]
     );
@@ -76,7 +77,7 @@ export default function MakePaymentPage() {
       // Only allow digits, max 4
       value = value.replace(/\D/g, '').slice(0, 4);
     }
-    
+
     setFormData(prev => ({ ...prev, [field]: value }));
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
@@ -103,7 +104,7 @@ export default function MakePaymentPage() {
 
     try {
       makePaymentSchema.parse(validationData);
-      
+
       // Additional credit card validation
       if (paymentMethod === 'Credit Card' && formData.cardNumber) {
         const cardValidation = validateCreditCard(formData.cardNumber.replace(/\s/g, ''));
@@ -112,19 +113,19 @@ export default function MakePaymentPage() {
           return false;
         }
       }
-      
+
       setErrors({});
       return true;
     } catch (error: any) {
       const fieldErrors: Record<string, string> = {};
-      
+
       if (error.errors) {
         error.errors.forEach((err: any) => {
           const field = err.path[0];
           fieldErrors[field] = err.message;
         });
       }
-      
+
       setErrors(fieldErrors);
       return false;
     }
@@ -132,20 +133,20 @@ export default function MakePaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsProcessing(true);
-    
+
     try {
       // Simulate payment processing delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       const totalAmount = calculateTotalAmount();
       const confirmationNumber = `PAY-${Date.now()}`;
-      
+
       // Mock payment processing
       console.log('Processing payment:', {
         amount: totalAmount,
@@ -153,16 +154,16 @@ export default function MakePaymentPage() {
         balances: selectedBalances,
         timestamp: new Date().toISOString()
       });
-      
+
       // Simulate email confirmation
       console.log('Confirmation email sent to:', user?.username);
-      
+
       setPaymentDetails({
         amount: totalAmount,
         confirmationNumber
       });
       setPaymentSuccess(true);
-      
+
     } catch (error) {
       setErrors({ submit: 'Payment processing failed. Please try again.' });
     } finally {
@@ -513,7 +514,7 @@ export default function MakePaymentPage() {
                       <div className="text-sm text-blue-800">
                         <p className="font-medium mb-1">Secure Payment Processing</p>
                         <p>
-                          All payment information is encrypted and processed securely. 
+                          All payment information is encrypted and processed securely.
                           We do not store your payment details on our servers.
                         </p>
                       </div>
