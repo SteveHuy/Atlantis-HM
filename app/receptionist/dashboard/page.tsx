@@ -21,7 +21,7 @@ import {
   UserCog,
   AlertCircle,
   MessageSquare,
-  Shield
+  Shield,
   CreditCard,
   Mail,
   Building2
@@ -268,6 +268,12 @@ export default function ReceptionistDashboardPage() {
                 <Link href="/receptionist/log-communications">
                   <Button size="sm" className="mt-2">
                     Log Communications
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="flex items-center p-6">
               <div className="flex-shrink-0">
@@ -296,6 +302,12 @@ export default function ReceptionistDashboardPage() {
                 <Link href="/receptionist/secure-communication">
                   <Button size="sm" className="mt-2">
                     Send Messages
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="flex items-center p-6">
               <div className="flex-shrink-0">
