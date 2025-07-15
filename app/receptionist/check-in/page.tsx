@@ -44,11 +44,11 @@ export default function CheckInPatientPage() {
 
   useEffect(() => {
     // Check if user is logged in as receptionist
-    const userSession = localStorage.getItem('receptionistSession');
-    if (!userSession) {
-      router.push('/receptionist/login');
-      return;
-    }
+    // const userSession = localStorage.getItem('receptionistSession');
+    // if (!userSession) {
+    //   router.push('/receptionist/login');
+    //   return;
+    // }
 
     loadTodayAppointments();
   }, [router]);

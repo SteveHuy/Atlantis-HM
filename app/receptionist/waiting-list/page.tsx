@@ -65,11 +65,11 @@ export default function WaitingListPage() {
 
   useEffect(() => {
     // Check if user is logged in as receptionist
-    const userSession = localStorage.getItem('receptionistSession');
-    if (!userSession) {
-      router.push('/receptionist/login');
-      return;
-    }
+    // const userSession = localStorage.getItem('receptionistSession');
+    // if (!userSession) {
+    //   router.push('/receptionist/login');
+    //   return;
+    // }
 
     loadWaitlistEntries();
     
@@ -143,8 +143,13 @@ export default function WaitingListPage() {
     setIsLoading(true);
     
     try {
+      const { startDate, endDate, ...restFormData } = formData;
       const newEntry = Epic5MockDataManager.addToWaitlist({
-        ...formData,
+        ...restFormData,
+        dateRange: {
+          start: startDate,
+          end: endDate
+        },
         patientName: `Patient ${formData.patientId}`, // Mock patient name lookup
         patientPhone: '(555) 000-0000', // Mock patient phone lookup
         notified: false,
