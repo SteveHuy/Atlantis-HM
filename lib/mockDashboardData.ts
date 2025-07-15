@@ -159,11 +159,19 @@ export const mockNotifications: MockNotification[] = [
 
 export const dashboardFeatures = [
   {
+    id: "messages",
+    title: "Messages",
+    description: "Secure communication with your healthcare providers",
+    icon: "MessageSquare",
+    color: "blue",
+    requirementRef: "#Secure Messaging"
+  },
+  {
     id: "medical-records",
     title: "Medical Records",
     description: "View your complete medical history and test results",
     icon: "FileText",
-    color: "blue",
+    color: "green",
     requirementRef: "#View Medical Records"
   },
   {
@@ -171,7 +179,7 @@ export const dashboardFeatures = [
     title: "Appointment History", 
     description: "Review past and upcoming appointments",
     icon: "Calendar",
-    color: "green",
+    color: "purple",
     requirementRef: "#View Appointment History"
   },
   {
@@ -187,7 +195,7 @@ export const dashboardFeatures = [
     title: "Insurance Details",
     description: "Submit and manage your insurance information",
     icon: "Shield",
-    color: "purple",
+    color: "gray",
     requirementRef: "#Submit Insurance Details"
   }
 ];

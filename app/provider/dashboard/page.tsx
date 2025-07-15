@@ -186,7 +186,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   size="sm" 
                   className="mt-2"
-                  onClick={() => router.push("/provider/secure-communication")}
+                  onClick={() => router.push("/provider/secure-messaging")}
                 >
                   Messages
                 </Button>
