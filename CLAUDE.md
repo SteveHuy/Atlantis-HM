@@ -18,9 +18,13 @@ Features ALWAYS map to a Userdoc Requirement through the "#"
 
 ## Implementation Plan vs Userdoc Requirements Resolution
 1. **If a Userdoc requirement references a feature via the # such as (#Something) that is NOT mentioned in the current implementation plan:**
-    - MUST add a comment in the code: `UD-REF: #Something - will be implemented in future epic`
-    - Implement a temporary placeholder/mock behavior for the current epic
-    - Do NOT implement the missing feature
+    - you MUST search the codebase to see if that feature has been implemented already if so then use the referenced feature accordingly
+      Example: You are implementing #Feature A which redirects to #Feature B on completion, and #Feature B is NOT being implemented in the epic. You MUST search the codebase and find #Feature B does exist. Therefore, when implementing #Feature A setup the redirect to #Feature B
+    - IF the feature has not already been implemented in the codebase:
+      - MUST add a comment in the code: `UD-REF: #Something - will be implemented in future epic`
+      Example: // UD-REF: #Feature B
+      - Implement a temporary placeholder/mock behavior for the current epic
+      - Do NOT implement the missing feature
 
 2. **If the implementation plan contradicts a Userdoc requirement:**
     - Follow the implementation plan for the current epic
@@ -97,7 +101,7 @@ So for the Patient Login, the correct approach would be:
 2. Search for existing `UD-REF: #Patient Dashboard` comments
 3. Follow the complete implementation process above
 4. Connect all previously deferred functionality
-    
+
 Please autonomously complete these tasks, ensuring you retrieve the requirements and implement.
 
 Make sure to make frequent git commits with descriptive messages as you go through
