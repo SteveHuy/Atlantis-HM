@@ -129,7 +129,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   size="sm" 
                   className="mt-2 bg-purple-600 hover:bg-purple-700"
-                  onClick={() => alert("UD-REF: #Access Appointment Schedules - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/appointment-schedules")}
                 >
                   View Schedules
                 </Button>
@@ -148,7 +148,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   size="sm" 
                   className="mt-2"
-                  onClick={() => alert("UD-REF: #View Patient EHR - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/patient-ehr")}
                 >
                   Access EHR
                 </Button>
@@ -186,7 +186,7 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   size="sm" 
                   className="mt-2"
-                  onClick={() => alert("UD-REF: #Provider Secure Communication - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/secure-communication")}
                 >
                   Messages
                 </Button>
@@ -260,10 +260,34 @@ export default function ServiceProviderDashboardPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => alert("UD-REF: #Medication Order - will be implemented in future epic")}
+                  onClick={() => router.push("/provider/medication-orders")}
                 >
                   <Pill className="mr-2 h-4 w-4" />
                   Medication Orders
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push("/provider/view-schedules")}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  View Provider Schedules
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push("/provider/update-schedules")}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Update Provider Schedules
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push("/provider/prescription-refills")}
+                >
+                  <Pill className="mr-2 h-4 w-4" />
+                  Manage Prescription Refills
                 </Button>
               </div>
             </CardContent>
