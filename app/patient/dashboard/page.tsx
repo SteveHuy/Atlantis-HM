@@ -106,6 +106,15 @@ export default function PatientDashboard() {
       case 'appointment-reminders':
         router.push('/patient/appointment-reminders');
         break;
+      case 'make-payment':
+        router.push('/patient/make-payment');
+        break;
+      case 'payment-plans':
+        router.push('/patient/payment-plans');
+        break;
+      case 'billing-info':
+        router.push('/patient/billing-info');
+        break;
       default:
         // Show placeholder for features not yet implemented
         alert(`UD-REF: ${feature.requirementRef} - will be implemented in future epic`);
@@ -223,6 +232,7 @@ export default function PatientDashboard() {
                         feature.color === 'green' ? 'bg-green-100 text-green-600' :
                         feature.color === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
                         feature.color === 'purple' ? 'bg-purple-100 text-purple-600' :
+                        feature.color === 'indigo' ? 'bg-indigo-100 text-indigo-600' :
                         'bg-gray-100 text-gray-600'
                       }`}>
                         {feature.icon === 'MessageSquare' && <MessageSquare className="w-5 h-5" />}
@@ -231,6 +241,7 @@ export default function PatientDashboard() {
                         {feature.icon === 'Bell' && <Bell className="w-5 h-5" />}
                         {feature.icon === 'Shield' && <Shield className="w-5 h-5" />}
                         {feature.icon === 'CreditCard' && <CreditCard className="w-5 h-5" />}
+                        {feature.icon === 'Shield' && <Shield className="w-5 h-5" />}
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">

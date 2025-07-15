@@ -53,7 +53,7 @@ const mockAppointments: AppointmentData[] = [
     patientId: 'patient-1',
     patientName: 'John Doe',
     patientPhone: '(555) 123-4567',
-    appointmentTime: '2024-01-20T09:00:00',
+    appointmentTime: '2025-07-15T09:00:00',
     appointmentType: 'Routine Checkup',
     serviceType: 'General Consultation',
     providerId: 'provider-1',
@@ -74,7 +74,7 @@ const mockAppointments: AppointmentData[] = [
     patientId: 'patient-2',
     patientName: 'Jane Smith',
     patientPhone: '(555) 234-5678',
-    appointmentTime: '2024-01-20T10:30:00',
+    appointmentTime: '2025-07-14T10:30:00',
     appointmentType: 'Follow-up Visit',
     serviceType: 'Cardiology Consultation',
     providerId: 'provider-2',
@@ -95,7 +95,7 @@ const mockAppointments: AppointmentData[] = [
     patientId: 'patient-3',
     patientName: 'Bob Johnson',
     patientPhone: '(555) 345-6789',
-    appointmentTime: '2024-01-20T14:00:00',
+    appointmentTime: '2025-07-13T14:00:00',
     appointmentType: 'Procedure',
     serviceType: 'Minor Surgery',
     providerId: 'provider-1',
@@ -550,7 +550,7 @@ export default function AccessAppointmentSchedulesPage() {
               <Button
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => alert('Add appointment functionality would be implemented here')}
+                onClick={() => router.push('/patient/schedule-appointment')}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Appointment

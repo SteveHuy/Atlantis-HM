@@ -176,10 +176,10 @@ const auditLog: AuditLogEntry[] = [];
 export const mockDataManager = {
   // Receptionist functions
   getReceptionists: () => [...mockReceptionists],
-  
-  getReceptionistByUsername: (username: string) => 
+
+  getReceptionistByUsername: (username: string) =>
     mockReceptionists.find(r => r.username === username && r.isActive),
-  
+
   updateReceptionistFailedAttempts: (username: string, attempts: number) => {
     const receptionist = mockReceptionists.find(r => r.username === username);
     if (receptionist) {
@@ -189,7 +189,7 @@ export const mockDataManager = {
       }
     }
   },
-  
+
   updateReceptionistLastLogin: (username: string) => {
     const receptionist = mockReceptionists.find(r => r.username === username);
     if (receptionist) {
@@ -199,12 +199,12 @@ export const mockDataManager = {
     }
   },
 
-  // Provider functions  
+  // Provider functions
   getProviders: () => [...mockProviders],
-  
-  getProviderByUsername: (username: string) => 
+
+  getProviderByUsername: (username: string) =>
     mockProviders.find(p => p.username === username && p.isActive),
-  
+
   updateProviderFailedAttempts: (username: string, attempts: number) => {
     const provider = mockProviders.find(p => p.username === username);
     if (provider) {
@@ -214,7 +214,7 @@ export const mockDataManager = {
       }
     }
   },
-  
+
   updateProviderLastLogin: (username: string) => {
     const provider = mockProviders.find(p => p.username === username);
     if (provider) {
@@ -226,13 +226,13 @@ export const mockDataManager = {
 
   // Patient functions
   getPatients: () => [...mockPatients],
-  
-  getPatientByUsername: (username: string) => 
+
+  getPatientByUsername: (username: string) =>
     mockPatients.find(p => p.username === username && p.isActive),
-  
-  getPatientByEmail: (email: string) => 
+
+  getPatientByEmail: (email: string) =>
     mockPatients.find(p => p.email === email && p.isActive),
-  
+
   createPatient: (patientData: Omit<MockPatient, 'id' | 'role' | 'isActive' | 'registrationDate'>) => {
     const newPatient: MockPatient = {
       ...patientData,
@@ -244,7 +244,7 @@ export const mockDataManager = {
     mockPatients.push(newPatient);
     return newPatient;
   },
-  
+
   updatePatientEmergencyContact: (patientId: string, emergencyContact: MockPatient['emergencyContact']) => {
     const patient = mockPatients.find(p => p.id === patientId);
     if (patient) {
@@ -264,7 +264,7 @@ export const mockDataManager = {
     auditLog.push(newEntry);
     return newEntry;
   },
-  
+
   getAuditLog: () => [...auditLog],
 
   // Utility functions
@@ -273,7 +273,7 @@ export const mockDataManager = {
            !mockProviders.some(p => p.username === username) &&
            !mockPatients.some(p => p.username === username);
   },
-  
+
   isEmailUnique: (email: string, excludeId?: string) => {
     return !mockPatients.some(p => p.email === email && p.id !== excludeId);
   }
@@ -293,10 +293,10 @@ export interface UserSession {
 export const sessionManager = {
   createSession: (user: MockReceptionist | MockProvider | MockPatient, rememberMe = false): UserSession => {
     const loginTime = new Date().toISOString();
-    const expiresAt = rememberMe 
+    const expiresAt = rememberMe
       ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
       : new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(); // 8 hours
-    
+
     return {
       userId: user.id,
       username: user.username,
@@ -307,36 +307,39 @@ export const sessionManager = {
       rememberMe
     };
   },
-  
+
   isSessionValid: (session: UserSession): boolean => {
     return new Date(session.expiresAt) > new Date();
   },
-  
+
   clearSession: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('userSession');
       sessionStorage.removeItem('userSession');
     }
   },
-  
+
   saveSession: (session: UserSession) => {
     if (typeof window !== 'undefined') {
       const storage = session.rememberMe ? localStorage : sessionStorage;
       storage.setItem('userSession', JSON.stringify(session));
     }
   },
-  
+
   getSession: (): UserSession | null => {
     if (typeof window === 'undefined') return null;
-    
+    console.log("Window not undefined");
+
     // Check session storage first, then local storage
     const sessionData = sessionStorage.getItem('userSession') || localStorage.getItem('userSession');
+    console.log("Session data is: ", sessionData);
     if (!sessionData) return null;
-    
+
     try {
       const session: UserSession = JSON.parse(sessionData);
       return sessionManager.isSessionValid(session) ? session : null;
     } catch {
+      console.error("Error parsing session data");
       return null;
     }
   }

@@ -197,5 +197,29 @@ export const dashboardFeatures = [
     icon: "Shield",
     color: "gray",
     requirementRef: "#Submit Insurance Details"
+  },
+  {
+    id: "make-payment",
+    title: "Make Payment",
+    description: "Pay your outstanding balances securely online",
+    icon: "CreditCard",
+    color: "blue",
+    requirementRef: "#Make Payment"
+  },
+  {
+    id: "payment-plans",
+    title: "Payment Plans",
+    description: "Setup and manage payment plans for your healthcare expenses",
+    icon: "Calendar",
+    color: "green",
+    requirementRef: "#Manage Payment Plans"
+  },
+  {
+    id: "billing-info",
+    title: "Billing Information",
+    description: "View billing details, transactions, and payment history",
+    icon: "FileText",
+    color: "indigo",
+    requirementRef: "#View Patient Billing Info"
   }
 ];
