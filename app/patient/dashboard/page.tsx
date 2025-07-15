@@ -110,8 +110,7 @@ export default function PatientDashboard() {
         router.push('/patient/payment-plans');
         break;
       case 'billing-info':
-        // UD-REF: #View Patient Billing Info - will be implemented in future epic
-        alert(`UD-REF: ${feature.requirementRef} - will be implemented in future epic`);
+        router.push('/patient/billing-info');
         break;
       default:
         // Show placeholder for features not yet implemented
