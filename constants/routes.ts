@@ -16,6 +16,18 @@ export const ROUTES = {
   INSURANCE_CLAIMS: '/patient/claims',
   EMERGENCY_CONTACT: '/patient/emergency-contact',
   
+  // Receptionist Routes
+  RECEPTIONIST_LOGIN: '/receptionist/login',
+  RECEPTIONIST_DASHBOARD: '/receptionist/dashboard',
+  GENERATE_PATIENT_STATEMENTS: '/receptionist/generate-statements',
+  GENERATE_DAILY_REPORTS: '/receptionist/daily-reports',
+  
+  // Provider Routes
+  PROVIDER_LOGIN: '/provider/login',
+  PROVIDER_DASHBOARD: '/provider/dashboard',
+  CREATE_VISIT_SUMMARY: '/provider/visit-summary',
+  ORDER_IMAGING_STUDIES: '/provider/imaging-studies',
+  
   // Account Management
   ACCOUNT_RECOVERY: '/account/recover',
 } as const;
