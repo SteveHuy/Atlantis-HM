@@ -133,7 +133,7 @@ export default function ManageRejectionsPage() {
           
           // Navigate to Track Claim Status after 2 seconds
           setTimeout(() => {
-            alert('UD-REF: #Track Claim Status - will be implemented in future epic');
+            router.push('/receptionist/track-claims');
           }, 2000);
         } else {
           setMessage({ type: 'error', text: 'Failed to resubmit claim. Please try again.' });
@@ -187,7 +187,7 @@ export default function ManageRejectionsPage() {
         
         // Navigate to Track Claim Status after 2 seconds
         setTimeout(() => {
-          alert('UD-REF: #Track Claim Status - will be implemented in future epic');
+          router.push('/receptionist/track-claims');
         }, 2000);
       } else {
         setMessage({ type: 'error', text: 'Failed to submit appeal. Please try again.' });
