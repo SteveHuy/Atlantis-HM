@@ -8,19 +8,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Epic5MockDataManager, 
+import {
+  Epic5MockDataManager,
   type TodayAppointmentCheckIn
 } from '@/lib/epic5-mock-data';
-import { 
+import {
   checkInSearchSchema,
   type CheckInSearchData,
   sanitizeInput
 } from '@/lib/epic5-validation';
-import { 
-  ArrowLeft, 
-  UserCheck, 
-  Search, 
+import {
+  ArrowLeft,
+  UserCheck,
+  Search,
   Clock,
   User,
   CheckCircle,
@@ -69,12 +69,12 @@ export default function CheckInPatientPage() {
     }
 
     const query = searchQuery.toLowerCase();
-    const filtered = todayAppointments.filter(apt => 
+    const filtered = todayAppointments.filter(apt =>
       apt.patientName.toLowerCase().includes(query) ||
       apt.appointmentId.toLowerCase().includes(query) ||
       apt.patientId.toLowerCase().includes(query)
     );
-    
+
     setFilteredAppointments(filtered);
   };
 
@@ -86,7 +86,7 @@ export default function CheckInPatientPage() {
     try {
       checkInSearchSchema.parse(searchData);
       setValidationErrors({});
-      
+
       if (filteredAppointments.length === 0 && searchQuery.trim()) {
         setMessage({
           type: 'error',
@@ -97,7 +97,7 @@ export default function CheckInPatientPage() {
       }
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -113,57 +113,57 @@ export default function CheckInPatientPage() {
 
   const handleCheckIn = async (appointmentId: string) => {
     const appointment = todayAppointments.find(apt => apt.id === appointmentId);
-    
+
     if (!appointment) {
       setMessage({ type: 'error', text: 'Appointment not found.' });
       return;
     }
 
     if (!appointment.canCheckIn) {
-      setMessage({ 
-        type: 'error', 
-        text: 'Patient cannot be checked in. Appointment may be cancelled or already checked in.' 
+      setMessage({
+        type: 'error',
+        text: 'Patient cannot be checked in. Appointment may be cancelled or already checked in.'
       });
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const success = Epic5MockDataManager.checkInPatient(appointmentId);
-      
+
       if (success) {
         // Update local state
-        setTodayAppointments(prev => prev.map(apt => 
-          apt.id === appointmentId 
-            ? { 
-                ...apt, 
+        setTodayAppointments(prev => prev.map(apt =>
+          apt.id === appointmentId
+            ? {
+                ...apt,
                 status: 'checked-in',
-                checkInTime: new Date().toLocaleTimeString('en-US', { 
-                  hour12: false, 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
+                checkInTime: new Date().toLocaleTimeString('en-US', {
+                  hour12: false,
+                  hour: '2-digit',
+                  minute: '2-digit'
                 }),
                 checkInBy: 'R001',
                 canCheckIn: false
               }
             : apt
         ));
-        
+
         setMessage({
           type: 'success',
           text: `${appointment.patientName} checked in successfully. Provider ${appointment.providerName} has been notified.`
         });
-        
+
         // Clear selection after successful check-in
         setTimeout(() => {
           setSelectedAppointment(null);
         }, 2000);
-        
+
       } else {
         setMessage({ type: 'error', text: 'Failed to check in patient. Please try again.' });
       }
-      
+
     } catch (error) {
       setMessage({ type: 'error', text: 'An error occurred during check-in process.' });
     } finally {
@@ -224,7 +224,7 @@ export default function CheckInPatientPage() {
     const [hours, minutes] = scheduledTime.split(':').map(Number);
     const appointmentTime = new Date();
     appointmentTime.setHours(hours, minutes, 0, 0);
-    
+
     const diffMinutes = (appointmentTime.getTime() - now.getTime()) / (1000 * 60);
     return diffMinutes <= 30 && diffMinutes >= -15; // Within 30 minutes before or 15 minutes after
   };
@@ -249,7 +249,7 @@ export default function CheckInPatientPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <UserCheck className="h-8 w-8 text-blue-600" />
@@ -258,15 +258,15 @@ export default function CheckInPatientPage() {
                 <p className="text-gray-600">Manage patient arrivals for today's appointments</p>
               </div>
             </div>
-            
+
             <div className="text-right">
               <div className="text-sm text-gray-500">Current Time</div>
               <div className="text-xl font-bold text-blue-600">{getCurrentTime()}</div>
               <div className="text-sm text-gray-500">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  month: 'long', 
-                  day: 'numeric' 
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric'
                 })}
               </div>
             </div>
@@ -275,8 +275,8 @@ export default function CheckInPatientPage() {
 
         {message && (
           <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-            {message.type === 'error' ? 
-              <XCircle className="h-4 w-4 text-red-600" /> : 
+            {message.type === 'error' ?
+              <XCircle className="h-4 w-4 text-red-600" /> :
               <CheckCircle className="h-4 w-4 text-green-600" />
             }
             <AlertDescription className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>
@@ -371,8 +371,8 @@ export default function CheckInPatientPage() {
                       <div
                         key={appointment.id}
                         className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                          selectedAppointment?.id === appointment.id 
-                            ? 'border-blue-500 bg-blue-50' 
+                          selectedAppointment?.id === appointment.id
+                            ? 'border-blue-500 bg-blue-50'
                             : 'hover:bg-gray-50'
                         } ${
                           isAppointmentSoon(appointment.scheduledTime) ? 'border-l-4 border-l-orange-400' : ''
@@ -399,7 +399,7 @@ export default function CheckInPatientPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className="font-medium text-gray-600">Provider:</span>
@@ -414,7 +414,7 @@ export default function CheckInPatientPage() {
                             <div>{appointment.patientPhone}</div>
                           </div>
                         </div>
-                        
+
                         {appointment.checkInTime && (
                           <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded text-sm">
                             <div className="flex items-center gap-2 text-green-800">
@@ -424,7 +424,7 @@ export default function CheckInPatientPage() {
                             </div>
                           </div>
                         )}
-                        
+
                         {isAppointmentSoon(appointment.scheduledTime) && appointment.canCheckIn && (
                           <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded text-sm">
                             <div className="flex items-center gap-2 text-orange-800">
@@ -458,7 +458,7 @@ export default function CheckInPatientPage() {
                         <Label>Full Name</Label>
                         <div className="font-semibold text-lg">{selectedAppointment.patientName}</div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>Patient ID</Label>
@@ -486,12 +486,12 @@ export default function CheckInPatientPage() {
                         <Label>Provider</Label>
                         <div className="font-semibold">{selectedAppointment.providerName}</div>
                       </div>
-                      
+
                       <div>
                         <Label>Service Type</Label>
                         <div className="font-medium">{selectedAppointment.serviceType}</div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>Scheduled Time</Label>
@@ -507,7 +507,7 @@ export default function CheckInPatientPage() {
                           </Badge>
                         </div>
                       </div>
-                      
+
                       {selectedAppointment.checkInTime && (
                         <div className="p-3 bg-green-50 border border-green-200 rounded">
                           <div className="text-green-800 font-medium">
@@ -556,7 +556,7 @@ export default function CheckInPatientPage() {
                           )}
                         </div>
                       )}
-                      
+
                       <Button
                         onClick={() => handleViewMedicalRecords(selectedAppointment.patientId)}
                         variant="outline"

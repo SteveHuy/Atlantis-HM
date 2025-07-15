@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  MessageSquare, 
-  Send, 
-  Paperclip, 
-  ArrowLeft, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Send,
+  Paperclip,
+  ArrowLeft,
+  CheckCircle,
   AlertTriangle,
   User,
   Clock,
@@ -18,11 +18,11 @@ import {
   X
 } from 'lucide-react';
 import { sessionManager, type UserSession } from '@/lib/epic3-mock-data';
-import { 
-  serviceProviderDataManager, 
+import {
+  serviceProviderDataManager,
   mockSecureMessages,
   type SecureMessage,
-  type MessageAttachment 
+  type MessageAttachment
 } from '@/lib/service-provider-mock-data';
 import { providerSecureCommunicationSchema } from '@/lib/service-provider-validation';
 
@@ -46,7 +46,7 @@ export default function ProviderSecureCommunicationPage() {
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Form state
   const [selectedRecipientId, setSelectedRecipientId] = useState('');
   const [selectedRecipient, setSelectedRecipient] = useState<MessageRecipient | null>(null);
@@ -54,7 +54,7 @@ export default function ProviderSecureCommunicationPage() {
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const [priority, setPriority] = useState<'low' | 'normal' | 'high' | 'urgent'>('normal');
-  
+
   // UI state
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState('');
@@ -65,12 +65,12 @@ export default function ProviderSecureCommunicationPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
     setIsLoading(false);
   }, [router]);
@@ -79,7 +79,7 @@ export default function ProviderSecureCommunicationPage() {
     const recipient = mockRecipients.find(r => r.id === recipientId);
     setSelectedRecipientId(recipientId);
     setSelectedRecipient(recipient || null);
-    
+
     if (recipient && session) {
       // Load past communications
       const userMessages = serviceProviderDataManager.getMessagesForUser(session.userId, 'provider');
@@ -87,7 +87,7 @@ export default function ProviderSecureCommunicationPage() {
         (msg.senderId === session.userId && msg.recipientId === recipientId) ||
         (msg.senderId === recipientId && msg.recipientId === session.userId)
       ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      
+
       setPastMessages(conversationMessages);
       setShowPastMessages(conversationMessages.length > 0);
     } else {
@@ -100,14 +100,14 @@ export default function ProviderSecureCommunicationPage() {
     const files = Array.from(event.target.files || []);
     const errors: string[] = [];
     const validFiles: File[] = [];
-    
+
     files.forEach(file => {
       // Check file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
         errors.push(`${file.name}: File size exceeds 10MB limit`);
         return;
       }
-      
+
       // Check file type
       const allowedTypes = [
         'application/pdf',
@@ -118,23 +118,23 @@ export default function ProviderSecureCommunicationPage() {
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       ];
-      
+
       if (!allowedTypes.includes(file.type)) {
         errors.push(`${file.name}: File type not allowed`);
         return;
       }
-      
+
       validFiles.push(file);
     });
-    
+
     if (attachments.length + validFiles.length > 5) {
       errors.push('Cannot attach more than 5 files total');
     } else {
       setAttachments(prev => [...prev, ...validFiles]);
     }
-    
+
     setAttachmentErrors(errors);
-    
+
     // Clear file input
     if (event.target) {
       event.target.value = '';
@@ -174,7 +174,7 @@ export default function ProviderSecureCommunicationPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(e => e.message).join(', ');
+        const errors = validationResult.error.issues.map(e => e.message).join(', ');
         setSendError(errors);
         setIsSending(false);
         return;
@@ -205,13 +205,13 @@ export default function ProviderSecureCommunicationPage() {
 
       // Show success message
       setSendSuccess(true);
-      
+
       // Clear form
       setSubject('');
       setContent('');
       setAttachments([]);
       setPriority('normal');
-      
+
       // Update past messages
       const updatedMessages = [newMessage, ...pastMessages];
       setPastMessages(updatedMessages);
@@ -293,7 +293,7 @@ export default function ProviderSecureCommunicationPage() {
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">Secure Communication</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-green-600">
                 <Shield className="h-4 w-4" />
@@ -579,7 +579,7 @@ export default function ProviderSecureCommunicationPage() {
                           )}
                           <div className="flex items-center gap-2 mt-2">
                             <div className={`text-xs px-2 py-1 rounded ${
-                              message.deliveryStatus === 'delivered' 
+                              message.deliveryStatus === 'delivered'
                                 ? 'bg-green-100 text-green-800'
                                 : message.deliveryStatus === 'failed'
                                 ? 'bg-red-100 text-red-800'

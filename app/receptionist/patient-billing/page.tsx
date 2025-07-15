@@ -13,14 +13,14 @@ export default function ViewPatientBillingInfoPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ username: string; role: string; firstName: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Billing data state
   const [allTransactions, setAllTransactions] = useState<BillingTransaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<BillingTransaction[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<BillingTransaction | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  
+
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -32,7 +32,7 @@ export default function ViewPatientBillingInfoPage() {
     minAmount: '',
     maxAmount: ''
   });
-  
+
   // Update form state
   const [updateForm, setUpdateForm] = useState({
     adjustmentAmount: 0,
@@ -40,7 +40,7 @@ export default function ViewPatientBillingInfoPage() {
     notes: '',
     updateType: 'balance_adjustment' as 'balance_adjustment' | 'payment_correction' | 'billing_correction'
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -50,9 +50,9 @@ export default function ViewPatientBillingInfoPage() {
       router.push('/receptionist/login');
       return;
     }
-    
+
     setUser(session);
-    
+
     // Load billing transactions
     const transactions = billingDataManager.getBillingTransactions();
     setAllTransactions(transactions);
@@ -63,17 +63,17 @@ export default function ViewPatientBillingInfoPage() {
   // Apply search and filters
   useEffect(() => {
     let filtered = allTransactions;
-    
+
     // Apply search
     if (searchTerm) {
-      filtered = filtered.filter(transaction => 
+      filtered = filtered.filter(transaction =>
         transaction.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.provider.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.serviceType.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     // Apply filters
     if (filters.dateFrom) {
       filtered = filtered.filter(t => new Date(t.serviceDate) >= new Date(filters.dateFrom));
@@ -96,7 +96,7 @@ export default function ViewPatientBillingInfoPage() {
     if (filters.maxAmount) {
       filtered = filtered.filter(t => t.totalAmount <= parseFloat(filters.maxAmount));
     }
-    
+
     setFilteredTransactions(filtered);
   }, [searchTerm, filters, allTransactions]);
 
@@ -123,7 +123,7 @@ export default function ViewPatientBillingInfoPage() {
 
   const handleSelectTransaction = (transaction: BillingTransaction) => {
     setSelectedTransaction(transaction);
-    
+
     // Log access to billing record
     logBillingActivity(
       'billing_record_accessed',
@@ -166,30 +166,30 @@ export default function ViewPatientBillingInfoPage() {
 
     try {
       billingUpdateSchema.parse(validationData);
-      
+
       // Additional validation
       if (Math.abs(updateForm.adjustmentAmount) > selectedTransaction.totalAmount) {
         setErrors({ adjustmentAmount: 'Adjustment amount cannot exceed total transaction amount' });
         return false;
       }
-      
+
       if (updateForm.adjustmentAmount !== 0 && !updateForm.adjustmentReason.trim()) {
         setErrors({ adjustmentReason: 'Adjustment reason is required when making adjustments' });
         return false;
       }
-      
+
       setErrors({});
       return true;
     } catch (error: any) {
       const fieldErrors: Record<string, string> = {};
-      
-      if (error.errors) {
-        error.errors.forEach((err: any) => {
+
+      if (error.issues) {
+        error.issues.forEach((err: any) => {
           const field = err.path[0];
           fieldErrors[field] = err.message;
         });
       }
-      
+
       setErrors(fieldErrors);
       return false;
     }
@@ -197,21 +197,21 @@ export default function ViewPatientBillingInfoPage() {
 
   const handleSubmitUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedTransaction || !validateUpdateForm()) {
       return;
     }
-    
+
     setIsUpdating(true);
-    
+
     try {
       // Simulate update processing delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // Calculate new balance
       const newBalance = selectedTransaction.balance + updateForm.adjustmentAmount;
       const newPaidAmount = selectedTransaction.totalAmount - newBalance;
-      
+
       // Update transaction
       const updates: Partial<BillingTransaction> = {
         balance: Math.max(0, newBalance),
@@ -219,9 +219,9 @@ export default function ViewPatientBillingInfoPage() {
         status: newBalance <= 0 ? 'Paid' : newBalance < selectedTransaction.totalAmount ? 'Partial' : 'Outstanding',
         notes: updateForm.notes || selectedTransaction.notes
       };
-      
+
       const updatedTransaction = billingDataManager.updateBillingTransaction(selectedTransaction.id, updates);
-      
+
       if (updatedTransaction) {
         // Log the update
         logBillingActivity(
@@ -237,16 +237,16 @@ export default function ViewPatientBillingInfoPage() {
             newBalance: updates.balance
           }
         );
-        
+
         // Update local state
-        setAllTransactions(prev => 
+        setAllTransactions(prev =>
           prev.map(t => t.id === selectedTransaction.id ? updatedTransaction : t)
         );
-        
+
         setShowUpdateModal(false);
         setSelectedTransaction(updatedTransaction);
       }
-      
+
     } catch (error) {
       setErrors({ submit: 'Failed to update billing record. Please try again.' });
     } finally {
@@ -512,7 +512,7 @@ For questions about this bill, please contact our billing department.`;
             <CardHeader>
               <CardTitle>Transaction Details</CardTitle>
               <CardDescription>
-                {selectedTransaction 
+                {selectedTransaction
                   ? `Details for ${selectedTransaction.patientName}`
                   : 'Select a transaction to view details'
                 }

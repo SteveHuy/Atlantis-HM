@@ -14,13 +14,13 @@ export default function ViewProviderSchedulesPage() {
   const searchParams = useSearchParams();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Form state
   const [selectedProviderId, setSelectedProviderId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'booked' | 'blocked'>('all');
-  
+
   // Results state
   const [scheduleData, setScheduleData] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -29,29 +29,29 @@ export default function ViewProviderSchedulesPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Set default date range (next 7 days)
     const today = new Date();
     const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7);
-    
+
     setStartDate(today.toISOString().split('T')[0]);
     setEndDate(nextWeek.toISOString().split('T')[0]);
-    
+
     setIsLoading(false);
   }, [router]);
 
   const handleSearch = async () => {
     setSearchError('');
     setIsSearching(true);
-    
+
     try {
       // Validate input
       const validationResult = viewProviderSchedulesSchema.safeParse({
@@ -62,7 +62,7 @@ export default function ViewProviderSchedulesPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(e => e.message).join(', ');
+        const errors = validationResult.error.issues.map(e => e.message).join(', ');
         setSearchError(errors);
         setIsSearching(false);
         return;
@@ -169,7 +169,7 @@ export default function ViewProviderSchedulesPage() {
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">View Provider Schedules</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
                 {session.fullName}

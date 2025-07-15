@@ -45,14 +45,14 @@ export default function PatientEHRAccessPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'receptionist') {
       router.push('/receptionist/login');
       return;
     }
-    
+
     setSession(userSession);
-          
+
           // Check if patient ID is provided in search params
           const patientId = searchParams.get('patientId');
           if (patientId) {
@@ -67,13 +67,13 @@ export default function PatientEHRAccessPage() {
                 phone: patient.phone,
                 email: patient.email
               };
-              
+
               // Set patient data directly
               setSelectedPatient(patient);
-              
+
               // Get EHR data
               const ehrData = clinicalDataManager.getPatientMedicalRecords(patient.id);
-              
+
               setPatientEHR({
                 allergies: patient.allergies,
                 medications: patient.medications.filter(m => m.status === 'active'),
@@ -87,7 +87,7 @@ export default function PatientEHRAccessPage() {
             }
           }
 
-    
+
     setIsLoading(false);
   }, [router, searchParams]);
 
@@ -109,7 +109,7 @@ export default function PatientEHRAccessPage() {
 
       // Search patients
       const patients = clinicalDataManager.searchPatients(validatedData.query);
-      
+
       // Format results
       const results: SearchResult[] = patients.map(patient => ({
         id: patient.id,
@@ -121,14 +121,14 @@ export default function PatientEHRAccessPage() {
       }));
 
       setSearchResults(results);
-      
+
       // Log search for audit trail
       logClinicalAccess('search_patient_ehr', 'multiple', user || 'unknown');
-      
+
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: { [key: string]: string } = {};
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path.length > 0) {
             fieldErrors[err.path[0]] = err.message;
           }
@@ -152,10 +152,10 @@ export default function PatientEHRAccessPage() {
     }
 
     setSelectedPatient(fullPatient);
-    
+
     // Get EHR data
     const ehrData = clinicalDataManager.getPatientMedicalRecords(patient.id);
-    
+
     setPatientEHR({
       allergies: fullPatient.allergies,
       medications: fullPatient.medications.filter(m => m.status === 'active'),
@@ -253,12 +253,12 @@ export default function PatientEHRAccessPage() {
               <span>{selectedPatient ? 'Back to Search' : 'Back to Dashboard'}</span>
             </button>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">
             {selectedPatient ? 'Patient EHR Details' : 'Access Patient EHR'}
           </h1>
           <p className="text-gray-600 mt-2">
-            {selectedPatient 
+            {selectedPatient
               ? `View essential EHR information for ${selectedPatient.firstName} ${selectedPatient.lastName}`
               : 'Search for and access essential patient EHR details'
             }
@@ -270,7 +270,7 @@ export default function PatientEHRAccessPage() {
           <div className="max-w-2xl mx-auto">
             <Card className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Search Patient Records</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -381,7 +381,7 @@ export default function PatientEHRAccessPage() {
                   <span>Export Summary</span>
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600">Date of Birth:</p>
@@ -419,7 +419,7 @@ export default function PatientEHRAccessPage() {
                     <ChevronDown className="w-5 h-5 text-gray-500" />
                   )}
                 </button>
-                
+
                 {expandedSections.allergies && (
                   <div className="space-y-2">
                     {patientEHR?.allergies.length === 0 ? (
@@ -464,7 +464,7 @@ export default function PatientEHRAccessPage() {
                     <ChevronDown className="w-5 h-5 text-gray-500" />
                   )}
                 </button>
-                
+
                 {expandedSections.medications && (
                   <div className="space-y-2">
                     {patientEHR?.medications.length === 0 ? (
@@ -507,7 +507,7 @@ export default function PatientEHRAccessPage() {
                     <ChevronDown className="w-5 h-5 text-gray-500" />
                   )}
                 </button>
-                
+
                 {expandedSections.visits && (
                   <div className="space-y-2">
                     {patientEHR?.recentVisits.length === 0 ? (
@@ -537,7 +537,7 @@ export default function PatientEHRAccessPage() {
                   <User className="w-5 h-5 text-purple-600" />
                   <h3 className="text-lg font-semibold text-gray-900">Emergency Contact</h3>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm text-gray-600">Name:</p>

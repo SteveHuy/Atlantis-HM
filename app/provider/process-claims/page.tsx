@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { 
-  ArrowLeft, 
-  FileText, 
-  User, 
-  Calendar, 
-  DollarSign, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  ArrowLeft,
+  FileText,
+  User,
+  Calendar,
+  DollarSign,
+  CheckCircle,
+  AlertCircle,
   Send,
   Edit,
   Eye,
@@ -57,7 +57,7 @@ const mockClaims = [
     }
   },
   {
-    id: "CLM002", 
+    id: "CLM002",
     patientId: "P002",
     patientName: "Jane Doe",
     serviceDate: "2024-02-03",
@@ -85,7 +85,7 @@ type ClaimData = z.infer<typeof claimSchema>;
 
 export default function ProcessClaimsPage() {
   const router = useRouter();
-  const [selectedPatient, setSelectedPatient] = useState<string>("");
+  const [selectedPatient, setSelectedPatient] = useState<string>("all");
   const [selectedClaim, setSelectedClaim] = useState<typeof mockClaims[0] | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<ClaimData>({
@@ -103,8 +103,8 @@ export default function ProcessClaimsPage() {
   } | null>(null);
   const [claimHistory, setClaimHistory] = useState<string[]>([]);
 
-  const availableClaims = mockClaims.filter(claim => 
-    !selectedPatient || claim.patientId === selectedPatient
+  const availableClaims = mockClaims.filter(claim =>
+    selectedPatient === "all" || claim.patientId === selectedPatient
   );
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export default function ProcessClaimsPage() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path.length > 0) {
             fieldErrors[err.path[0] as string] = err.message;
           }
@@ -153,16 +153,16 @@ export default function ProcessClaimsPage() {
     if (!validateClaimData()) {
       return;
     }
-    
+
     if (selectedClaim) {
       // Update the claim with edited data
       selectedClaim.serviceDate = editableData.serviceDate;
       selectedClaim.codes = [...editableData.codes];
       selectedClaim.amounts = [...editableData.amounts];
       selectedClaim.ehrData.procedureNotes = editableData.notes || "";
-      
+
       setIsEditing(false);
-      
+
       const historyEntry = `${new Date().toLocaleString()}: Claim ${selectedClaim.id} updated by provider`;
       setClaimHistory(prev => [...prev, historyEntry]);
     }
@@ -179,27 +179,27 @@ export default function ProcessClaimsPage() {
     try {
       // Simulate electronic transmission
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       const claimNumber = `CLM-${Date.now()}`;
       const patient = mockPatients.find(p => p.id === selectedClaim.patientId);
-      
+
       // Mock submission success/failure
       const isSuccess = Math.random() > 0.2; // 80% success rate
-      
+
       if (isSuccess) {
         setSubmissionStatus({
           status: 'success',
           message: `Claim successfully transmitted to ${patient?.insuranceProvider}`,
           claimNumber
         });
-        
+
         // Update claim status
         selectedClaim.status = 'submitted' as const;
         selectedClaim.submissionDate = new Date().toISOString();
-        
+
         const historyEntry = `${new Date().toLocaleString()}: Claim ${selectedClaim.id} submitted electronically - Reference: ${claimNumber}`;
         setClaimHistory(prev => [...prev, historyEntry]);
-        
+
         // Navigate to Track Claim Status after 3 seconds
         setTimeout(() => {
           router.push('/receptionist/track-claims');
@@ -351,7 +351,7 @@ export default function ProcessClaimsPage() {
                         <SelectValue placeholder="All patients" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All patients</SelectItem>
+                        <SelectItem value="all">All patients</SelectItem>
                         {mockPatients.map((patient) => (
                           <SelectItem key={patient.id} value={patient.id}>
                             {patient.name}
@@ -369,8 +369,8 @@ export default function ProcessClaimsPage() {
                         <div
                           key={claim.id}
                           className={`p-3 border rounded cursor-pointer transition-colors ${
-                            selectedClaim?.id === claim.id 
-                              ? 'border-blue-500 bg-blue-50' 
+                            selectedClaim?.id === claim.id
+                              ? 'border-blue-500 bg-blue-50'
                               : 'border-gray-200 hover:bg-gray-50'
                           }`}
                           onClick={() => handleClaimSelect(claim.id)}
@@ -437,11 +437,11 @@ export default function ProcessClaimsPage() {
                         </div>
                         <div>
                           <Label>Service Date</Label>
-                          <Input 
-                            value={isEditing ? editableData.serviceDate : selectedClaim.serviceDate} 
+                          <Input
+                            value={isEditing ? editableData.serviceDate : selectedClaim.serviceDate}
                             onChange={(e) => isEditing && setEditableData(prev => ({ ...prev, serviceDate: e.target.value }))}
-                            readOnly={!isEditing} 
-                            className={isEditing ? "" : "bg-gray-50"} 
+                            readOnly={!isEditing}
+                            className={isEditing ? "" : "bg-gray-50"}
                             type="date"
                           />
                         </div>
@@ -457,10 +457,10 @@ export default function ProcessClaimsPage() {
                         </div>
                         <div>
                           <Label>Total Amount</Label>
-                          <Input 
-                            value={`$${getTotalAmount().toFixed(2)}`} 
-                            readOnly 
-                            className="bg-gray-50 font-semibold" 
+                          <Input
+                            value={`$${getTotalAmount().toFixed(2)}`}
+                            readOnly
+                            className="bg-gray-50 font-semibold"
                           />
                         </div>
                       </div>
@@ -529,7 +529,7 @@ export default function ProcessClaimsPage() {
                           </div>
                         </div>
                       ))}
-                      
+
                       {isEditing && (
                         <Button onClick={handleAddServiceCode} variant="outline" size="sm">
                           Add Service Code

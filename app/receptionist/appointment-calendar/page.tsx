@@ -10,15 +10,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Epic5MockDataManager, 
+import {
+  Epic5MockDataManager,
   type CalendarAppointment,
   mockProviders,
   mockServices,
   mockLocations
 } from '@/lib/epic5-mock-data';
-import { 
-  calendarAppointmentSchema, 
+import {
+  calendarAppointmentSchema,
   calendarFilterSchema,
   type CalendarAppointmentData,
   type CalendarFilterData,
@@ -27,10 +27,10 @@ import {
   validateBusinessHours,
   validateFutureDate
 } from '@/lib/epic5-validation';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Plus, 
+import {
+  ArrowLeft,
+  Calendar,
+  Plus,
   Filter,
   Eye,
   Edit,
@@ -56,7 +56,7 @@ export default function AppointmentCalendarPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showAppointmentLog, setShowAppointmentLog] = useState(false);
-  
+
   // Form states
   const [formData, setFormData] = useState<CalendarAppointmentData>({
     patientId: '',
@@ -68,7 +68,7 @@ export default function AppointmentCalendarPage() {
     location: '',
     notes: ''
   });
-  
+
   // Filter states
   const [filters, setFilters] = useState<CalendarFilterData>({
     provider: '',
@@ -78,7 +78,7 @@ export default function AppointmentCalendarPage() {
     endDate: '',
     view: 'week'
   });
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -106,31 +106,31 @@ export default function AppointmentCalendarPage() {
 
   const applyFilters = () => {
     let filtered = [...appointments];
-    
+
     // Apply provider filter
     if (filters.provider) {
       filtered = filtered.filter(apt => apt.providerName === filters.provider);
     }
-    
+
     // Apply service filter
     if (filters.service) {
       filtered = filtered.filter(apt => apt.serviceType === filters.service);
     }
-    
+
     // Apply location filter
     if (filters.location) {
       filtered = filtered.filter(apt => apt.location === filters.location);
     }
-    
+
     // Apply date range filter based on current view
     const startOfView = getStartOfView(currentDate, currentView);
     const endOfView = getEndOfView(currentDate, currentView);
-    
+
     filtered = filtered.filter(apt => {
       const aptDate = new Date(apt.date);
       return aptDate >= startOfView && aptDate <= endOfView;
     });
-    
+
     setFilteredAppointments(filtered);
   };
 
@@ -176,7 +176,7 @@ export default function AppointmentCalendarPage() {
       ...prev,
       [field]: sanitizedValue
     }));
-    
+
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors(prev => {
@@ -197,29 +197,29 @@ export default function AppointmentCalendarPage() {
   const validateForm = (): boolean => {
     try {
       calendarAppointmentSchema.parse(formData);
-      
+
       // Additional validation
       if (!validatePatientId(formData.patientId)) {
         setValidationErrors({ patientId: 'Patient ID must be in format P001-P999999' });
         return false;
       }
-      
+
       if (!validateFutureDate(formData.date)) {
         setValidationErrors({ date: 'Appointment date cannot be in the past' });
         return false;
       }
-      
+
       if (!validateBusinessHours(formData.time)) {
         setValidationErrors({ time: 'Appointment time must be during business hours (8:00 AM - 5:00 PM)' });
         return false;
       }
-      
+
       setValidationErrors({});
       return true;
-      
+
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -230,14 +230,14 @@ export default function AppointmentCalendarPage() {
   };
 
   const checkSlotAvailability = (date: string, time: string, providerId: string, excludeId?: string): boolean => {
-    const conflictingAppointments = appointments.filter(apt => 
-      apt.date === date && 
-      apt.providerId === providerId && 
+    const conflictingAppointments = appointments.filter(apt =>
+      apt.date === date &&
+      apt.providerId === providerId &&
       apt.time === time &&
       apt.status !== 'cancelled' &&
       apt.id !== excludeId
     );
-    
+
     return conflictingAppointments.length === 0;
   };
 
@@ -250,18 +250,18 @@ export default function AppointmentCalendarPage() {
     // Check slot availability
     const isAvailable = checkSlotAvailability(formData.date, formData.time, formData.providerId);
     if (!isAvailable) {
-      setMessage({ 
-        type: 'error', 
-        text: 'The selected time slot is not available. Please choose a different time.' 
+      setMessage({
+        type: 'error',
+        text: 'The selected time slot is not available. Please choose a different time.'
       });
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const providerName = mockProviders.find(p => p.id === formData.providerId)?.name || 'Unknown Provider';
-      
+
       const newAppointment = Epic5MockDataManager.createAppointment({
         ...formData,
         patientName: `Patient ${formData.patientId}`, // Mock patient name
@@ -269,13 +269,13 @@ export default function AppointmentCalendarPage() {
         providerName,
         status: 'scheduled'
       });
-      
+
       setAppointments(prev => [...prev, newAppointment]);
-      setMessage({ 
-        type: 'success', 
-        text: 'Appointment scheduled successfully. Confirmation sent to patient and provider.' 
+      setMessage({
+        type: 'success',
+        text: 'Appointment scheduled successfully. Confirmation sent to patient and provider.'
       });
-      
+
       // Reset form
       setFormData({
         patientId: '',
@@ -288,7 +288,7 @@ export default function AppointmentCalendarPage() {
         notes: ''
       });
       setShowAddForm(false);
-      
+
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to schedule appointment. Please try again.' });
     } finally {
@@ -308,9 +308,9 @@ export default function AppointmentCalendarPage() {
 
   const handleDrop = async (newDate: string, newTime: string, e: React.DragEvent) => {
     e.preventDefault();
-    
+
     if (!draggedAppointment) return;
-    
+
     // Check if new slot is available
     const isAvailable = checkSlotAvailability(newDate, newTime, draggedAppointment.providerId, draggedAppointment.id);
     if (!isAvailable) {
@@ -323,38 +323,38 @@ export default function AppointmentCalendarPage() {
     const confirmed = window.confirm(
       `Reschedule appointment for ${draggedAppointment.patientName} from ${draggedAppointment.date} ${draggedAppointment.time} to ${newDate} ${newTime}?`
     );
-    
+
     if (confirmed) {
       const success = Epic5MockDataManager.updateAppointment(draggedAppointment.id, {
         date: newDate,
         time: newTime
       });
-      
+
       if (success) {
         loadAppointments();
-        setMessage({ 
-          type: 'success', 
-          text: 'Appointment rescheduled successfully. Notifications sent to patient and provider.' 
+        setMessage({
+          type: 'success',
+          text: 'Appointment rescheduled successfully. Notifications sent to patient and provider.'
         });
       } else {
         setMessage({ type: 'error', text: 'Failed to reschedule appointment' });
       }
     }
-    
+
     setDraggedAppointment(null);
   };
 
   const handleCancelAppointment = async (appointmentId: string) => {
     const confirmed = window.confirm('Are you sure you want to cancel this appointment?');
-    
+
     if (confirmed) {
       const success = Epic5MockDataManager.cancelAppointment(appointmentId);
-      
+
       if (success) {
         loadAppointments();
-        setMessage({ 
-          type: 'success', 
-          text: 'Appointment cancelled successfully. Notifications sent to patient and provider.' 
+        setMessage({
+          type: 'success',
+          text: 'Appointment cancelled successfully. Notifications sent to patient and provider.'
         });
         setSelectedAppointment(null);
       } else {
@@ -400,7 +400,7 @@ export default function AppointmentCalendarPage() {
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    
+
     switch (currentView) {
       case 'day':
         newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
@@ -412,7 +412,7 @@ export default function AppointmentCalendarPage() {
         newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
         break;
     }
-    
+
     setCurrentDate(newDate);
   };
 
@@ -443,7 +443,7 @@ export default function AppointmentCalendarPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Calendar className="h-8 w-8 text-blue-600" />
@@ -452,7 +452,7 @@ export default function AppointmentCalendarPage() {
                 <p className="text-gray-600">Manage appointments, scheduling, and availability</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <Button
                 onClick={() => setShowFilters(!showFilters)}
@@ -474,8 +474,8 @@ export default function AppointmentCalendarPage() {
 
         {message && (
           <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-            {message.type === 'error' ? 
-              <XCircle className="h-4 w-4 text-red-600" /> : 
+            {message.type === 'error' ?
+              <XCircle className="h-4 w-4 text-red-600" /> :
               <CheckCircle className="h-4 w-4 text-green-600" />
             }
             <AlertDescription className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>
@@ -553,9 +553,9 @@ export default function AppointmentCalendarPage() {
                   Next →
                 </Button>
               </div>
-              
+
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
                   onClick={() => setCurrentDate(new Date())}
                   variant="outline"
                   size="sm"
@@ -603,7 +603,7 @@ export default function AppointmentCalendarPage() {
                           date.setDate(date.getDate() + dayOffset);
                           const dateString = date.toISOString().split('T')[0];
                           const appointments = getAppointmentsForSlot(dateString, timeSlot);
-                          
+
                           return (
                             <div
                               key={dayOffset}
@@ -628,7 +628,7 @@ export default function AppointmentCalendarPage() {
                         })}
                       </div>
                     ))}
-                    
+
                     {/* Week days header */}
                     <div className="grid grid-cols-8 gap-2 pb-2 border-b font-medium text-center text-sm sticky top-0 bg-white">
                       <div></div>
@@ -645,7 +645,7 @@ export default function AppointmentCalendarPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {(currentView === 'day' || currentView === 'month') && (
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -657,7 +657,7 @@ export default function AppointmentCalendarPage() {
                     </p>
                   </div>
                 )}
-                
+
                 {/* Simple list view for day/month */}
                 {(currentView === 'day' || currentView === 'month') && (
                   <div className="space-y-3 mt-6">
@@ -708,17 +708,17 @@ export default function AppointmentCalendarPage() {
                       <div className="font-medium">{selectedAppointment.patientName}</div>
                       <div className="text-sm text-gray-500">{selectedAppointment.patientPhone}</div>
                     </div>
-                    
+
                     <div>
                       <Label>Provider</Label>
                       <div className="font-medium">{selectedAppointment.providerName}</div>
                     </div>
-                    
+
                     <div>
                       <Label>Service Type</Label>
                       <div className="font-medium">{selectedAppointment.serviceType}</div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Date</Label>
@@ -729,7 +729,7 @@ export default function AppointmentCalendarPage() {
                         <div className="font-medium">{formatTime(selectedAppointment.time)}</div>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Duration</Label>
@@ -740,21 +740,21 @@ export default function AppointmentCalendarPage() {
                         <div className="font-medium">{selectedAppointment.location}</div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <Label>Status</Label>
                       <Badge className={getStatusColor(selectedAppointment.status)}>
                         {selectedAppointment.status}
                       </Badge>
                     </div>
-                    
+
                     {selectedAppointment.notes && (
                       <div>
                         <Label>Notes</Label>
                         <div className="text-sm bg-gray-50 p-2 rounded">{selectedAppointment.notes}</div>
                       </div>
                     )}
-                    
+
                     <div className="flex gap-2 pt-4">
                       <Button
                         onClick={() => handleCancelAppointment(selectedAppointment.id)}
@@ -769,7 +769,7 @@ export default function AppointmentCalendarPage() {
                 </CardContent>
               </Card>
             )}
-            
+
             {/* Quick Stats */}
             <Card>
               <CardHeader>
@@ -828,7 +828,7 @@ export default function AppointmentCalendarPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.patientId}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="providerId">Provider *</Label>
                       <select
@@ -849,7 +849,7 @@ export default function AppointmentCalendarPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="serviceType">Service Type *</Label>
@@ -868,7 +868,7 @@ export default function AppointmentCalendarPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.serviceType}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="location">Location *</Label>
                       <select
@@ -887,7 +887,7 @@ export default function AppointmentCalendarPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="date">Date *</Label>
@@ -903,7 +903,7 @@ export default function AppointmentCalendarPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.date}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="time">Time *</Label>
                       <select
@@ -921,7 +921,7 @@ export default function AppointmentCalendarPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.time}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="duration">Duration (minutes) *</Label>
                       <select
@@ -941,7 +941,7 @@ export default function AppointmentCalendarPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="notes">Notes (Optional)</Label>
                     <Textarea
@@ -953,7 +953,7 @@ export default function AppointmentCalendarPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex gap-3 mt-6">
                   <Button
                     onClick={() => setShowAddForm(false)}

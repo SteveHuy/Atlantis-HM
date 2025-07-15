@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const insuranceProviders = [
   "Aetna",
   "Blue Cross Blue Shield",
-  "Cigna", 
+  "Cigna",
   "Humana",
   "Kaiser Permanente",
   "Medicare",
@@ -50,7 +50,7 @@ export default function InsuranceDetailsPage() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<Record<keyof InsuranceForm, string>> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path.length > 0) {
             const field = err.path[0] as keyof InsuranceForm;
             fieldErrors[field] = err.message;
@@ -64,7 +64,7 @@ export default function InsuranceDetailsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -74,9 +74,9 @@ export default function InsuranceDetailsPage() {
     try {
       // Simulate API call to submit insurance details
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       setShowSuccess(true);
-      
+
       // Redirect to Patient Dashboard after showing success message
       setTimeout(() => {
         router.push('/patient/dashboard');

@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Pill, 
-  Send, 
-  ArrowLeft, 
+import {
+  Pill,
+  Send,
+  ArrowLeft,
   AlertTriangle,
   User,
   Search,
@@ -15,8 +15,8 @@ import {
   Shield
 } from 'lucide-react';
 import { sessionManager, type UserSession } from '@/lib/epic3-mock-data';
-import { 
-  serviceProviderDataManager, 
+import {
+  serviceProviderDataManager,
   mockMedications,
   mockPharmacies,
   type Medication
@@ -48,7 +48,7 @@ export default function MedicationOrdersPage() {
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Form state
   const [formData, setFormData] = useState<MedicationOrderForm>({
     patientId: '',
@@ -62,34 +62,34 @@ export default function MedicationOrdersPage() {
     quantity: 30,
     refills: 0
   });
-  
+
   // Selected medication details
   const [selectedMedication, setSelectedMedication] = useState<Medication | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<typeof mockPatients[0] | null>(null);
-  
+
   // Drug search
   const [drugSearchQuery, setDrugSearchQuery] = useState('');
   const [drugSearchResults, setDrugSearchResults] = useState<Medication[]>([]);
   const [showDrugSearch, setShowDrugSearch] = useState(false);
-  
+
   // UI state
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const [sendSuccess, setSendSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  
+
   // Alerts
   const [drugInteractionAlerts, setDrugInteractionAlerts] = useState<string[]>([]);
   const [allergyAlerts, setAllergyAlerts] = useState<string[]>([]);
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
     setIsLoading(false);
   }, [router]);
@@ -98,7 +98,7 @@ export default function MedicationOrdersPage() {
     const patient = mockPatients.find(p => p.id === patientId);
     setSelectedPatient(patient || null);
     setFormData(prev => ({ ...prev, patientId }));
-    
+
     // Check for allergy interactions with current medication
     if (patient && selectedMedication) {
       checkAllergyInteractions(patient, selectedMedication);
@@ -107,7 +107,7 @@ export default function MedicationOrdersPage() {
 
   const handleDrugSearch = (query: string) => {
     setDrugSearchQuery(query);
-    
+
     if (query.length >= 2) {
       const results = mockMedications.filter(med =>
         med.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -132,7 +132,7 @@ export default function MedicationOrdersPage() {
     }));
     setShowDrugSearch(false);
     setDrugSearchQuery(medication.name);
-    
+
     // Check for drug interactions and allergies
     setDrugInteractionAlerts(medication.commonInteractions);
     if (selectedPatient) {
@@ -142,7 +142,7 @@ export default function MedicationOrdersPage() {
 
   const checkAllergyInteractions = (patient: typeof mockPatients[0], medication: Medication) => {
     const alerts: string[] = [];
-    
+
     // Check if medication name contains any patient allergies
     patient.allergies.forEach(allergy => {
       if (medication.name.toLowerCase().includes(allergy.toLowerCase()) ||
@@ -150,13 +150,13 @@ export default function MedicationOrdersPage() {
         alerts.push(`Patient is allergic to ${allergy}`);
       }
     });
-    
+
     setAllergyAlerts(alerts);
   };
 
   const updateFormField = (field: keyof MedicationOrderForm, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear field-specific errors
     if (formErrors[field]) {
       setFormErrors(prev => {
@@ -169,7 +169,7 @@ export default function MedicationOrdersPage() {
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    
+
     if (!formData.patientId) errors.patientId = 'Patient selection is required';
     if (!formData.drugName) errors.drugName = 'Drug name is required';
     if (!formData.dosage) errors.dosage = 'Dosage is required';
@@ -179,7 +179,7 @@ export default function MedicationOrdersPage() {
     if (formData.quantity <= 0) errors.quantity = 'Quantity must be positive';
     if (formData.refills < 0) errors.refills = 'Refills cannot be negative';
     if (formData.refills > 11) errors.refills = 'Cannot exceed 11 refills';
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -201,7 +201,7 @@ export default function MedicationOrdersPage() {
       const validationResult = medicationOrderSchema.safeParse(formData);
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map((e: any) => e.message).join(', ');
+        const errors = validationResult.error.issues.map((e: any) => e.message).join(', ');
         setSendError(errors);
         setIsSending(false);
         return;
@@ -209,7 +209,7 @@ export default function MedicationOrdersPage() {
 
       // Mock prescription sending
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-      
+
       // Log the prescription order
       serviceProviderDataManager.logSecurityEvent(
         'PRESCRIPTION_ORDERED',
@@ -219,7 +219,7 @@ export default function MedicationOrdersPage() {
       );
 
       setSendSuccess(true);
-      
+
       // Reset form
       setFormData({
         patientId: '',
@@ -286,7 +286,7 @@ export default function MedicationOrdersPage() {
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">Order Medication</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
                 {session.fullName}
@@ -380,7 +380,7 @@ export default function MedicationOrdersPage() {
               {formErrors.patientId && (
                 <p className="text-sm text-red-600 mt-1">{formErrors.patientId}</p>
               )}
-              
+
               {selectedPatient && (
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
                   <div className="flex items-center gap-2 mb-1">
@@ -388,7 +388,7 @@ export default function MedicationOrdersPage() {
                     <span className="font-medium text-blue-900">{selectedPatient.name}</span>
                   </div>
                   <p className="text-sm text-blue-700">
-                    Age: {selectedPatient.age} | 
+                    Age: {selectedPatient.age} |
                     Allergies: {selectedPatient.allergies.length > 0 ? selectedPatient.allergies.join(', ') : 'None'}
                   </p>
                 </div>

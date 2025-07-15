@@ -13,20 +13,20 @@ export default function ProcessPaymentsPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ username: string; role: string; firstName: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Payments state
   const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
   const [selectedPayment, setSelectedPayment] = useState<PendingPayment | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedReceipt, setProcessedReceipt] = useState<PaymentReceipt | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Form state
   const [formData, setFormData] = useState({
     confirmationCode: '',
     notes: ''
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -35,9 +35,9 @@ export default function ProcessPaymentsPage() {
       router.push('/receptionist/login');
       return;
     }
-    
+
     setUser(session);
-    
+
     // Load pending payments
     const payments = billingDataManager.getPendingPayments();
     setPendingPayments(payments);
@@ -75,25 +75,25 @@ export default function ProcessPaymentsPage() {
 
     try {
       processPaymentSchema.parse(validationData);
-      
+
       // Additional validation for specific payment methods
       if (selectedPayment.paymentMethod !== 'Cash' && !formData.confirmationCode.trim()) {
         setErrors({ confirmationCode: 'Confirmation code is required for non-cash payments' });
         return false;
       }
-      
+
       setErrors({});
       return true;
     } catch (error: any) {
       const fieldErrors: Record<string, string> = {};
-      
-      if (error.errors) {
-        error.errors.forEach((err: any) => {
+
+      if (error.issues) {
+        error.issues.forEach((err: any) => {
           const field = err.path[0];
           fieldErrors[field] = err.message;
         });
       }
-      
+
       setErrors(fieldErrors);
       return false;
     }
@@ -101,20 +101,20 @@ export default function ProcessPaymentsPage() {
 
   const handleProcessPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedPayment || !validateForm()) {
       return;
     }
-    
+
     setIsProcessing(true);
-    
+
     try {
       // Simulate payment processing delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Process payment through billing data manager
       const receipt = billingDataManager.processPayment(selectedPayment.id, user?.username || 'Unknown');
-      
+
       if (receipt) {
         // Log the activity
         logBillingActivity(
@@ -129,22 +129,22 @@ export default function ProcessPaymentsPage() {
             notes: formData.notes
           }
         );
-        
+
         // Update pending payments list
         setPendingPayments(prev => prev.filter(p => p.id !== selectedPayment.id));
         setProcessedReceipt(receipt);
         setSelectedPayment(null);
-        
+
         // Auto-redirect to Generate Patient Statements after 3 seconds
         setTimeout(() => {
           // UD-REF: #Generate Patient Statements - will be implemented in future epic
           console.log('Redirecting to Generate Patient Statements...');
         }, 3000);
-        
+
       } else {
         setErrors({ submit: 'Failed to process payment. Please try again.' });
       }
-      
+
     } catch (error) {
       setErrors({ submit: 'Payment processing failed. Please try again.' });
     } finally {
@@ -152,7 +152,7 @@ export default function ProcessPaymentsPage() {
     }
   };
 
-  const filteredPayments = pendingPayments.filter(payment => 
+  const filteredPayments = pendingPayments.filter(payment =>
     payment.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     payment.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     payment.provider.toLowerCase().includes(searchTerm.toLowerCase())
@@ -239,14 +239,14 @@ export default function ProcessPaymentsPage() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-800">
                   <Receipt className="w-4 h-4 inline mr-2" />
                   Redirecting to Generate Patient Statements in 3 seconds...
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button onClick={() => setProcessedReceipt(null)} className="flex items-center">
                   Process Another Payment
@@ -295,7 +295,7 @@ export default function ProcessPaymentsPage() {
                 </span>
               </CardTitle>
               <CardDescription>Select a payment to process</CardDescription>
-              
+
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -362,7 +362,7 @@ export default function ProcessPaymentsPage() {
             <CardHeader>
               <CardTitle>Payment Processing</CardTitle>
               <CardDescription>
-                {selectedPayment 
+                {selectedPayment
                   ? `Process payment for ${selectedPayment.patientName}`
                   : 'Select a payment from the left to process'
                 }
@@ -454,7 +454,7 @@ export default function ProcessPaymentsPage() {
                       <div className="text-sm text-blue-800">
                         <p className="font-medium mb-1">Payment Processing Security</p>
                         <p>
-                          All payment processing is logged for audit purposes. Ensure all payment 
+                          All payment processing is logged for audit purposes. Ensure all payment
                           details are verified before processing.
                         </p>
                       </div>

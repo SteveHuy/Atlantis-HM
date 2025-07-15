@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  FileText, 
-  Search, 
-  ArrowLeft, 
+import {
+  FileText,
+  Search,
+  ArrowLeft,
   User,
   Calendar,
   Pill,
@@ -62,21 +62,21 @@ const mockPatientEHR = {
       { id: '2', allergen: 'Shellfish', reaction: 'Hives, Swelling', severity: 'Moderate', dateReported: '2019-03-22' }
     ],
     visitSummaries: [
-      { 
-        id: '1', 
-        date: '2024-01-15', 
-        provider: 'Dr. Sarah Johnson', 
-        type: 'Follow-up Visit', 
+      {
+        id: '1',
+        date: '2024-01-15',
+        provider: 'Dr. Sarah Johnson',
+        type: 'Follow-up Visit',
         chiefComplaint: 'Diabetes management checkup',
         diagnosis: 'Type 2 Diabetes - well controlled',
         treatment: 'Continue current medications, dietary counseling',
         notes: 'Patient reports good compliance with medications. HbA1c improved to 6.8%.'
       },
-      { 
-        id: '2', 
-        date: '2023-12-10', 
-        provider: 'Dr. Michael Chen', 
-        type: 'Routine Physical', 
+      {
+        id: '2',
+        date: '2023-12-10',
+        provider: 'Dr. Michael Chen',
+        type: 'Routine Physical',
         chiefComplaint: 'Annual physical examination',
         diagnosis: 'Hypertension, well controlled',
         treatment: 'Continue Lisinopril, lifestyle modifications',
@@ -84,26 +84,26 @@ const mockPatientEHR = {
       }
     ],
     labResults: [
-      { 
-        id: '1', 
-        test: 'Comprehensive Metabolic Panel', 
-        date: '2024-01-15', 
+      {
+        id: '1',
+        test: 'Comprehensive Metabolic Panel',
+        date: '2024-01-15',
         results: 'Glucose: 105 mg/dL (Normal), Creatinine: 1.0 mg/dL (Normal)',
         status: 'Final',
         orderedBy: 'Dr. Johnson'
       },
-      { 
-        id: '2', 
-        test: 'HbA1c', 
-        date: '2024-01-15', 
+      {
+        id: '2',
+        test: 'HbA1c',
+        date: '2024-01-15',
         results: '6.8% (Good control)',
         status: 'Final',
         orderedBy: 'Dr. Johnson'
       },
-      { 
-        id: '3', 
-        test: 'Lipid Panel', 
-        date: '2023-12-10', 
+      {
+        id: '3',
+        test: 'Lipid Panel',
+        date: '2023-12-10',
         results: 'Total Cholesterol: 185 mg/dL, LDL: 110 mg/dL, HDL: 55 mg/dL',
         status: 'Final',
         orderedBy: 'Dr. Chen'
@@ -127,48 +127,48 @@ export default function ViewPatientEHRPage() {
   const searchParams = useSearchParams();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
-  
+
   // Selected patient state
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [accessReason, setAccessReason] = useState('');
   const [activeSection, setActiveSection] = useState<string>('overview');
-  
+
   // UI state
   const [showAccessForm, setShowAccessForm] = useState(false);
   const [accessError, setAccessError] = useState('');
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Check if patient ID is provided via URL params
     const patientId = searchParams.get('patientId');
     if (patientId && mockPatientEHR[patientId as keyof typeof mockPatientEHR]) {
       setSelectedPatient(mockPatientEHR[patientId as keyof typeof mockPatientEHR]);
       setAccessReason('Clinical consultation');
     }
-    
+
     setIsLoading(false);
   }, [router, searchParams]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
-    
+
     setIsSearching(true);
     setSearchError('');
-    
+
     // Simulate search delay
     setTimeout(() => {
       // Mock search results - in real app, this would be API call
@@ -176,13 +176,13 @@ export default function ViewPatientEHRPage() {
         patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         patient.id.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      
+
       setSearchResults(results);
-      
+
       if (results.length === 0) {
         setSearchError('No patients found matching your search criteria');
       }
-      
+
       setIsSearching(false);
     }, 1000);
   };
@@ -210,7 +210,7 @@ export default function ViewPatientEHRPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(e => e.message).join(', ');
+        const errors = validationResult.error.issues.map(e => e.message).join(', ');
         setAccessError(errors);
         return;
       }
@@ -301,7 +301,7 @@ export default function ViewPatientEHRPage() {
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">View Patient EHR</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-green-600">
                 <Shield className="h-4 w-4" />
@@ -405,7 +405,7 @@ export default function ViewPatientEHRPage() {
                         <strong>Patient:</strong> {selectedPatient.name} | <strong>ID:</strong> {selectedPatient.id}
                       </p>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <label htmlFor="accessReason" className="block text-sm font-medium text-gray-700 mb-2">
@@ -477,7 +477,7 @@ export default function ViewPatientEHRPage() {
                       </CardDescription>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -608,8 +608,8 @@ export default function ViewPatientEHRPage() {
                             <p className="text-sm text-gray-600">Date: {new Date(diagnosis.date).toLocaleDateString()}</p>
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            diagnosis.status === 'Active' 
-                              ? 'bg-red-100 text-red-800' 
+                            diagnosis.status === 'Active'
+                              ? 'bg-red-100 text-red-800'
                               : 'bg-gray-100 text-gray-800'
                           }`}>
                             {diagnosis.status}

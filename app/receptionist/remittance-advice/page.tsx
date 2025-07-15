@@ -13,20 +13,20 @@ export default function RemittanceAdvicePage() {
   const router = useRouter();
   const [user, setUser] = useState<{ username: string; role: string; firstName: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Remittance state
   const [remittanceAdvice, setRemittanceAdvice] = useState<RemittanceAdvice[]>([]);
   const [selectedRemittance, setSelectedRemittance] = useState<RemittanceAdvice | null>(null);
   const [selectedClaimId, setSelectedClaimId] = useState('');
   const [isReconciling, setIsReconciling] = useState(false);
   const [reconciliationSuccess, setReconciliationSuccess] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     adjustments: 0,
     notes: ''
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -35,9 +35,9 @@ export default function RemittanceAdvicePage() {
       router.push('/receptionist/login');
       return;
     }
-    
+
     setUser(session);
-    
+
     // Load remittance advice
     const advice = billingDataManager.getRemittanceAdvice();
     setRemittanceAdvice(advice);
@@ -77,14 +77,14 @@ export default function RemittanceAdvicePage() {
       return true;
     } catch (error: any) {
       const fieldErrors: Record<string, string> = {};
-      
-      if (error.errors) {
-        error.errors.forEach((err: any) => {
+
+      if (error.issues) {
+        error.issues.forEach((err: any) => {
           const field = err.path[0];
           fieldErrors[field] = err.message;
         });
       }
-      
+
       setErrors(fieldErrors);
       return false;
     }
@@ -92,20 +92,20 @@ export default function RemittanceAdvicePage() {
 
   const handleReconcile = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedRemittance || !validateForm()) {
       return;
     }
-    
+
     setIsReconciling(true);
-    
+
     try {
       // Simulate reconciliation processing delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Process reconciliation through billing data manager
       const success = billingDataManager.reconcileRemittance(selectedRemittance.id);
-      
+
       if (success) {
         // Log the activity
         logBillingActivity(
@@ -120,28 +120,28 @@ export default function RemittanceAdvicePage() {
             notes: formData.notes
           }
         );
-        
+
         // Update local state
-        setRemittanceAdvice(prev => 
-          prev.map(advice => 
-            advice.id === selectedRemittance.id 
+        setRemittanceAdvice(prev =>
+          prev.map(advice =>
+            advice.id === selectedRemittance.id
               ? { ...advice, reconciled: true, reconciledDate: new Date().toISOString() }
               : advice
           )
         );
-        
+
         setReconciliationSuccess(true);
-        
+
         // Auto-redirect to Process Payments after 3 seconds
         setTimeout(() => {
           // UD-REF: #Process Payments - redirect to Process Payments page
           router.push('/receptionist/process-payments');
         }, 3000);
-        
+
       } else {
         setErrors({ submit: 'Failed to reconcile remittance. Please try again.' });
       }
-      
+
     } catch (error) {
       setErrors({ submit: 'Reconciliation failed. Please try again.' });
     } finally {
@@ -207,14 +207,14 @@ export default function RemittanceAdvicePage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-800">
                   <FileText className="w-4 h-4 inline mr-2" />
                   Redirecting to Process Payments in 3 seconds...
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button onClick={() => setReconciliationSuccess(false)} className="flex items-center">
                   Reconcile Another
@@ -378,7 +378,7 @@ export default function RemittanceAdvicePage() {
                         </p>
                       </div>
                     </div>
-                    
+
                     {(selectedRemittance.adjustments > 0 || selectedRemittance.deniedAmount > 0) && (
                       <div className="border-t pt-4">
                         <h4 className="font-medium text-gray-900 mb-2">Additional Details</h4>
@@ -408,7 +408,7 @@ export default function RemittanceAdvicePage() {
               <CardHeader>
                 <CardTitle>Reconcile Payment</CardTitle>
                 <CardDescription>
-                  {selectedRemittance 
+                  {selectedRemittance
                     ? `Reconcile payment for claim ${selectedRemittance.claimId}`
                     : 'Select a remittance advice to reconcile'
                   }

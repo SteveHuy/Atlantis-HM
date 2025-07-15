@@ -10,16 +10,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Epic5MockDataManager, 
-  type RejectedClaim 
+import {
+  Epic5MockDataManager,
+  type RejectedClaim
 } from '@/lib/epic5-mock-data';
-import { 
-  claimAdjustmentSchema, 
+import {
+  claimAdjustmentSchema,
   appealSubmissionSchema,
   type ClaimAdjustmentData,
   type AppealSubmissionData,
-  sanitizeInput 
+  sanitizeInput
 } from '@/lib/epic5-validation';
 import { ArrowLeft, FileText, AlertCircle, CheckCircle, XCircle, Edit, Send } from 'lucide-react';
 
@@ -73,7 +73,7 @@ export default function ManageRejectionsPage() {
       ...prev,
       [field]: field === 'notes' ? sanitizeInput(value as string) : value
     }));
-    
+
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors(prev => {
@@ -91,7 +91,7 @@ export default function ManageRejectionsPage() {
       return true;
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -110,27 +110,27 @@ export default function ManageRejectionsPage() {
     }
 
     setIsLoading(true);
-    
+
     try {
       // Update claim adjustments
       const updateSuccess = Epic5MockDataManager.updateClaimAdjustments(
-        selectedClaim.id, 
+        selectedClaim.id,
         adjustmentData
       );
 
       if (updateSuccess) {
         // Resubmit claim
         const resubmitSuccess = Epic5MockDataManager.resubmitClaim(selectedClaim.id);
-        
+
         if (resubmitSuccess) {
-          setMessage({ 
-            type: 'success', 
-            text: 'Claim resubmitted successfully. The payer will review the updated information.' 
+          setMessage({
+            type: 'success',
+            text: 'Claim resubmitted successfully. The payer will review the updated information.'
           });
-          
+
           // Reload claims data
           loadRejectedClaims();
-          
+
           // Navigate to Track Claim Status after 2 seconds
           setTimeout(() => {
             router.push('/receptionist/track-claims');
@@ -161,7 +161,7 @@ export default function ManageRejectionsPage() {
       setValidationErrors({});
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -172,19 +172,19 @@ export default function ManageRejectionsPage() {
     }
 
     setIsLoading(true);
-    
+
     try {
       const success = Epic5MockDataManager.submitAppeal(selectedClaim.id, appealData.appealLetter);
-      
+
       if (success) {
-        setMessage({ 
-          type: 'success', 
-          text: 'Appeal submitted successfully. Electronic submission status: Pending review.' 
+        setMessage({
+          type: 'success',
+          text: 'Appeal submitted successfully. Electronic submission status: Pending review.'
         });
-        
+
         // Reload claims data
         loadRejectedClaims();
-        
+
         // Navigate to Track Claim Status after 2 seconds
         setTimeout(() => {
           router.push('/receptionist/track-claims');
@@ -247,8 +247,8 @@ export default function ManageRejectionsPage() {
 
         {message && (
           <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-            {message.type === 'error' ? 
-              <XCircle className="h-4 w-4 text-red-600" /> : 
+            {message.type === 'error' ?
+              <XCircle className="h-4 w-4 text-red-600" /> :
               <CheckCircle className="h-4 w-4 text-green-600" />
             }
             <AlertDescription className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>
@@ -375,7 +375,7 @@ export default function ManageRejectionsPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-6">
                       <Label>Denial Reasons</Label>
                       <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -412,7 +412,7 @@ export default function ManageRejectionsPage() {
                           <p className="text-red-500 text-sm mt-1">{validationErrors.procedureCode}</p>
                         )}
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="amount">Corrected Amount *</Label>
                         <Input
@@ -429,7 +429,7 @@ export default function ManageRejectionsPage() {
                           <p className="text-red-500 text-sm mt-1">{validationErrors.amount}</p>
                         )}
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="notes">Adjustment Notes</Label>
                         <Textarea
@@ -483,7 +483,7 @@ export default function ManageRejectionsPage() {
                           className="bg-gray-50"
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="appealLetter">Appeal Letter *</Label>
                         <Textarea

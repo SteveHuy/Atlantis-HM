@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Calendar, 
-  Clock, 
-  ArrowLeft, 
+import {
+  Calendar,
+  Clock,
+  ArrowLeft,
   User,
   MapPin,
   Filter,
@@ -123,7 +123,7 @@ export default function AccessAppointmentSchedulesPage() {
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Filter state
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -131,13 +131,13 @@ export default function AccessAppointmentSchedulesPage() {
   const [selectedProviderId, setSelectedProviderId] = useState('');
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'personal' | 'patient-specific'>('all');
-  
+
   // Data state
   const [appointments, setAppointments] = useState<AppointmentData[]>(mockAppointments);
   const [filteredAppointments, setFilteredAppointments] = useState<AppointmentData[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentData | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  
+
   // UI state
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState('');
@@ -147,24 +147,24 @@ export default function AccessAppointmentSchedulesPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Set default date range (current week)
     const today = new Date();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
-    
+
     setStartDate(startOfWeek.toISOString().split('T')[0]);
     setEndDate(endOfWeek.toISOString().split('T')[0]);
-    
+
     setIsLoading(false);
   }, [router]);
 
@@ -174,44 +174,44 @@ export default function AccessAppointmentSchedulesPage() {
 
   const applyFilters = () => {
     let filtered = [...appointments];
-    
+
     // Date range filter
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
-      
+
       filtered = filtered.filter(apt => {
         const aptDate = new Date(apt.appointmentTime);
         return aptDate >= start && aptDate <= end;
       });
     }
-    
+
     // Provider filter
     if (selectedProviderId) {
       filtered = filtered.filter(apt => apt.providerId === selectedProviderId);
     }
-    
+
     // Location filter
     if (selectedLocationId) {
       filtered = filtered.filter(apt => apt.locationId === selectedLocationId);
     }
-    
+
     // Filter type
     if (filterType === 'personal' && session) {
       filtered = filtered.filter(apt => apt.providerId === session.userId);
     }
-    
+
     // Sort by appointment time
     filtered.sort((a, b) => new Date(a.appointmentTime).getTime() - new Date(b.appointmentTime).getTime());
-    
+
     setFilteredAppointments(filtered);
   };
 
   const handleAppointmentSelect = (appointment: AppointmentData) => {
     setSelectedAppointment(appointment);
     setShowDetails(true);
-    
+
     // Log appointment access
     if (session) {
       serviceProviderDataManager.logSecurityEvent(
@@ -237,7 +237,7 @@ export default function AccessAppointmentSchedulesPage() {
 
   const confirmReschedule = async () => {
     if (!selectedAppointment || !newAppointmentTime || !session) return;
-    
+
     setUpdateError('');
     setUpdateSuccess('');
     setIsUpdating(true);
@@ -253,20 +253,20 @@ export default function AccessAppointmentSchedulesPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map(e => e.message).join(', ');
+        const errors = validationResult.error.issues.map(e => e.message).join(', ');
         setUpdateError(errors);
         setIsUpdating(false);
         return;
       }
 
       // Update appointment time
-      const updatedAppointments = appointments.map(apt => 
-        apt.id === selectedAppointment.id 
+      const updatedAppointments = appointments.map(apt =>
+        apt.id === selectedAppointment.id
           ? { ...apt, appointmentTime: newAppointmentTime }
           : apt
       );
       setAppointments(updatedAppointments);
-      
+
       // Log the reschedule
       serviceProviderDataManager.logSecurityEvent(
         'APPOINTMENT_RESCHEDULED',
@@ -279,7 +279,7 @@ export default function AccessAppointmentSchedulesPage() {
       setUpdateSuccess('Appointment rescheduled successfully. Patient has been notified.');
       setShowRescheduleModal(false);
       setSelectedAppointment(null);
-      
+
       // Auto-hide success message
       setTimeout(() => setUpdateSuccess(''), 3000);
 
@@ -302,13 +302,13 @@ export default function AccessAppointmentSchedulesPage() {
 
     try {
       // Update appointment status
-      const updatedAppointments = appointments.map(apt => 
-        apt.id === appointment.id 
+      const updatedAppointments = appointments.map(apt =>
+        apt.id === appointment.id
           ? { ...apt, status: 'cancelled' as const }
           : apt
       );
       setAppointments(updatedAppointments);
-      
+
       // Log the cancellation
       if (session) {
         serviceProviderDataManager.logSecurityEvent(
@@ -321,7 +321,7 @@ export default function AccessAppointmentSchedulesPage() {
       }
 
       setUpdateSuccess('Appointment cancelled successfully. Patient has been notified.');
-      
+
       // Auto-hide success message
       setTimeout(() => setUpdateSuccess(''), 3000);
 
@@ -399,7 +399,7 @@ export default function AccessAppointmentSchedulesPage() {
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">Appointment Schedules</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
@@ -557,7 +557,7 @@ export default function AccessAppointmentSchedulesPage() {
               </Button>
             </div>
             <CardDescription>
-              {startDate && endDate && 
+              {startDate && endDate &&
                 `Showing appointments from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}`
               }
             </CardDescription>
@@ -588,7 +588,7 @@ export default function AccessAppointmentSchedulesPage() {
                             {appointment.status}
                           </span>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                           <div>
                             <p className="text-sm text-gray-600">Type</p>
@@ -786,7 +786,7 @@ export default function AccessAppointmentSchedulesPage() {
               <div className="space-y-4">
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-sm text-blue-800">
-                    <strong>Patient:</strong> {selectedAppointment.patientName} | 
+                    <strong>Patient:</strong> {selectedAppointment.patientName} |
                     <strong> Type:</strong> {selectedAppointment.appointmentType}
                   </p>
                 </div>

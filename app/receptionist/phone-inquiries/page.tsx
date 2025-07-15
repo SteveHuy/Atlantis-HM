@@ -10,24 +10,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Epic5MockDataManager, 
+import {
+  Epic5MockDataManager,
   type PhoneInquiry,
-  mockDepartments 
+  mockDepartments
 } from '@/lib/epic5-mock-data';
-import { 
+import {
   phoneInquirySchema,
   type PhoneInquiryData,
   sanitizeInput,
   formatPhoneNumber,
   validatePhoneNumber
 } from '@/lib/epic5-validation';
-import { 
-  ArrowLeft, 
-  Phone, 
-  Search, 
-  User, 
-  Calendar, 
+import {
+  ArrowLeft,
+  Phone,
+  Search,
+  User,
+  Calendar,
   MessageSquare,
   Send,
   CheckCircle,
@@ -81,7 +81,7 @@ export default function PhoneInquiriesPage() {
       ...prev,
       [field]: sanitizedValue
     }));
-    
+
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors(prev => {
@@ -102,7 +102,7 @@ export default function PhoneInquiriesPage() {
     try {
       const results = Epic5MockDataManager.searchPatientByNameOrPhone(formData.patientSearch);
       setSearchResults(results);
-      
+
       if (results.length === 0) {
         setMessage({ type: 'error', text: 'No patients found with that name or phone number' });
       } else {
@@ -119,13 +119,13 @@ export default function PhoneInquiriesPage() {
     setSelectedPatient(patient);
     setSearchResults([]);
     setFormData(prev => ({ ...prev, patientSearch: patient.name }));
-    
+
     // Mock appointment history for selected patient
     const mockAppointmentHistory = [
       { id: 'a1', date: '2024-01-15', time: '10:00 AM', provider: 'Dr. Smith', status: 'completed' },
       { id: 'a2', date: '2024-02-20', time: '2:00 PM', provider: 'Dr. Wilson', status: 'scheduled' }
     ];
-    
+
     setSelectedPatient(prev => prev ? { ...prev, appointments: mockAppointmentHistory } : null);
   };
 
@@ -151,18 +151,18 @@ export default function PhoneInquiriesPage() {
   const validateForm = (): boolean => {
     try {
       phoneInquirySchema.parse(formData);
-      
+
       // Additional phone validation
       if (!validatePhoneNumber(formData.callerPhone)) {
         setValidationErrors({ callerPhone: 'Please enter a valid phone number' });
         return false;
       }
-      
+
       setValidationErrors({});
       return true;
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -193,11 +193,11 @@ export default function PhoneInquiriesPage() {
       const savedInquiry = Epic5MockDataManager.createPhoneInquiry(inquiryData);
       setReferenceNumber(savedInquiry.referenceNumber);
       setShowConfirmation(true);
-      setMessage({ 
-        type: 'success', 
-        text: `Call log saved successfully. Reference number: ${savedInquiry.referenceNumber}` 
+      setMessage({
+        type: 'success',
+        text: `Call log saved successfully. Reference number: ${savedInquiry.referenceNumber}`
       });
-      
+
       // Reset form
       setFormData({
         callerName: '',
@@ -213,7 +213,7 @@ export default function PhoneInquiriesPage() {
       setSelectedPatient(null);
       setAppointmentActions([]);
       setSearchResults([]);
-      
+
     } catch (error) {
       setMessage({ type: 'error', text: 'Error saving call log' });
     } finally {
@@ -231,10 +231,10 @@ export default function PhoneInquiriesPage() {
     try {
       // Simulate sending confirmation
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setMessage({ 
-        type: 'success', 
-        text: `Follow-up confirmation sent via ${formData.followUpMethod === 'sms' ? 'SMS' : 'email'}` 
+
+      setMessage({
+        type: 'success',
+        text: `Follow-up confirmation sent via ${formData.followUpMethod === 'sms' ? 'SMS' : 'email'}`
       });
     } catch (error) {
       setMessage({ type: 'error', text: 'Error sending follow-up confirmation' });
@@ -253,10 +253,10 @@ export default function PhoneInquiriesPage() {
     try {
       // Simulate transfer notification
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setMessage({ 
-        type: 'success', 
-        text: `Call transferred to ${formData.transferredTo} department. They have been notified.` 
+
+      setMessage({
+        type: 'success',
+        text: `Call transferred to ${formData.transferredTo} department. They have been notified.`
       });
     } catch (error) {
       setMessage({ type: 'error', text: 'Error transferring call' });
@@ -285,7 +285,7 @@ export default function PhoneInquiriesPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Phone className="h-8 w-8 text-blue-600" />
@@ -294,7 +294,7 @@ export default function PhoneInquiriesPage() {
                 <p className="text-gray-600">Log calls and manage appointments over the phone</p>
               </div>
             </div>
-            
+
             <Button
               onClick={() => setShowInquiryForm(true)}
               className="bg-blue-600 hover:bg-blue-700"
@@ -307,8 +307,8 @@ export default function PhoneInquiriesPage() {
 
         {message && (
           <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-            {message.type === 'error' ? 
-              <XCircle className="h-4 w-4 text-red-600" /> : 
+            {message.type === 'error' ?
+              <XCircle className="h-4 w-4 text-red-600" /> :
               <CheckCircle className="h-4 w-4 text-green-600" />
             }
             <AlertDescription className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>
@@ -335,7 +335,7 @@ export default function PhoneInquiriesPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
@@ -410,7 +410,7 @@ export default function PhoneInquiriesPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.callerName}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="callerPhone">Caller Phone Number *</Label>
                       <Input
@@ -425,7 +425,7 @@ export default function PhoneInquiriesPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="mt-6">
                     <Label htmlFor="reason">Reason for Call *</Label>
                     <Textarea
@@ -517,7 +517,7 @@ export default function PhoneInquiriesPage() {
                               <span className="font-medium">Patient ID:</span> {selectedPatient.id}
                             </div>
                           </div>
-                          
+
                           {selectedPatient.appointments && (
                             <div className="mt-4">
                               <Label>Recent Appointment History</Label>
@@ -561,7 +561,7 @@ export default function PhoneInquiriesPage() {
                       <p className="text-sm text-gray-600 mb-2">
                         Record any scheduling, rescheduling, or cancellation actions performed during this call
                       </p>
-                      
+
                       <div className="flex gap-2">
                         <Input
                           placeholder="e.g., Scheduled appointment for 2024-02-15 at 10:00 AM with Dr. Smith"

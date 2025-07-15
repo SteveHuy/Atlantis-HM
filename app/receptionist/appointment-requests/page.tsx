@@ -9,21 +9,21 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Epic5MockDataManager, 
+import {
+  Epic5MockDataManager,
   type AppointmentRequest,
   mockProviders
 } from '@/lib/epic5-mock-data';
-import { 
+import {
   appointmentRequestActionSchema,
   type AppointmentRequestActionData,
   sanitizeInput
 } from '@/lib/epic5-validation';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  CheckCircle, 
-  XCircle, 
+import {
+  ArrowLeft,
+  Calendar,
+  CheckCircle,
+  XCircle,
   Clock,
   User,
   AlertCircle,
@@ -81,7 +81,7 @@ export default function AppointmentRequestsPage() {
     setActionType(action);
     setShowAlternatives(false);
     setMessage(null);
-    
+
     if (action === 'approve' && selectedRequest) {
       // Check provider availability
       const isAvailable = checkProviderAvailability(
@@ -89,7 +89,7 @@ export default function AppointmentRequestsPage() {
         selectedRequest.requestedDate,
         selectedRequest.requestedTime
       );
-      
+
       if (!isAvailable) {
         setShowAlternatives(true);
         setMessage({
@@ -113,26 +113,26 @@ export default function AppointmentRequestsPage() {
 
     try {
       appointmentRequestActionSchema.parse(actionData);
-      
+
       // Additional validation
       if (actionType === 'decline' && !declineReason.trim()) {
         setValidationErrors({ declineReason: 'Please provide a reason for declining' });
         return false;
       }
-      
+
       if (showAlternatives && (!alternativeDate || !alternativeProvider)) {
-        setValidationErrors({ 
-          alternatives: 'Please select both alternative date and provider' 
+        setValidationErrors({
+          alternatives: 'Please select both alternative date and provider'
         });
         return false;
       }
-      
+
       setValidationErrors({});
       return true;
-      
+
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -151,12 +151,12 @@ export default function AppointmentRequestsPage() {
     }
 
     setIsLoading(true);
-    
+
     try {
       if (showAlternatives) {
         // Simulate checking alternative availability
         const altAvailable = checkProviderAvailability(alternativeProvider, alternativeDate, selectedRequest.requestedTime);
-        
+
         if (!altAvailable) {
           setMessage({
             type: 'error',
@@ -168,29 +168,29 @@ export default function AppointmentRequestsPage() {
       }
 
       const success = Epic5MockDataManager.approveAppointmentRequest(selectedRequest.id);
-      
+
       if (success) {
         setMessage({
           type: 'success',
-          text: showAlternatives 
+          text: showAlternatives
             ? `Appointment request approved with alternative scheduling: ${alternativeProvider} on ${alternativeDate}. Patient has been notified.`
             : `Appointment request approved for ${selectedRequest.preferredProvider} on ${selectedRequest.requestedDate}. Patient has been notified.`
         });
-        
+
         // Remove from pending list
         setPendingRequests(prev => prev.filter(req => req.id !== selectedRequest.id));
         setSelectedRequest(null);
         setActionType(null);
-        
+
         // Navigate to calendar after 2 seconds
         setTimeout(() => {
           handleNavigateToCalendar();
         }, 2000);
-        
+
       } else {
         setMessage({ type: 'error', text: 'Failed to approve appointment request. Please try again.' });
       }
-      
+
     } catch (error) {
       setMessage({ type: 'error', text: 'An error occurred while processing the request.' });
     } finally {
@@ -207,28 +207,28 @@ export default function AppointmentRequestsPage() {
     }
 
     setIsLoading(true);
-    
+
     try {
       const success = Epic5MockDataManager.declineAppointmentRequest(
-        selectedRequest.id, 
+        selectedRequest.id,
         sanitizeInput(declineReason)
       );
-      
+
       if (success) {
         setMessage({
           type: 'success',
           text: `Appointment request declined. Patient has been notified with the provided reason.`
         });
-        
+
         // Remove from pending list
         setPendingRequests(prev => prev.filter(req => req.id !== selectedRequest.id));
         setSelectedRequest(null);
         setActionType(null);
-        
+
       } else {
         setMessage({ type: 'error', text: 'Failed to decline appointment request. Please try again.' });
       }
-      
+
     } catch (error) {
       setMessage({ type: 'error', text: 'An error occurred while processing the request.' });
     } finally {
@@ -269,7 +269,7 @@ export default function AppointmentRequestsPage() {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - submittedDate.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return '1 day ago';
     return `${diffDays} days ago`;
@@ -287,7 +287,7 @@ export default function AppointmentRequestsPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Calendar className="h-8 w-8 text-blue-600" />
@@ -296,7 +296,7 @@ export default function AppointmentRequestsPage() {
                 <p className="text-gray-600">Review and process pending appointment requests</p>
               </div>
             </div>
-            
+
             <div className="text-right">
               <div className="text-sm text-gray-500">Pending Requests</div>
               <div className="text-2xl font-bold text-blue-600">{pendingRequests.length}</div>
@@ -306,8 +306,8 @@ export default function AppointmentRequestsPage() {
 
         {message && (
           <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-            {message.type === 'error' ? 
-              <XCircle className="h-4 w-4 text-red-600" /> : 
+            {message.type === 'error' ?
+              <XCircle className="h-4 w-4 text-red-600" /> :
               <CheckCircle className="h-4 w-4 text-green-600" />
             }
             <AlertDescription className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>
@@ -335,8 +335,8 @@ export default function AppointmentRequestsPage() {
                     <div
                       key={request.id}
                       className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                        selectedRequest?.id === request.id 
-                          ? 'border-blue-500 bg-blue-50' 
+                        selectedRequest?.id === request.id
+                          ? 'border-blue-500 bg-blue-50'
                           : 'hover:bg-gray-50'
                       }`}
                       onClick={() => handleRequestSelect(request)}
@@ -354,7 +354,7 @@ export default function AppointmentRequestsPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 gap-2 text-sm">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Appointment Type:</span>
@@ -485,7 +485,7 @@ export default function AppointmentRequestsPage() {
                     <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
                       <h3 className="font-semibold text-green-800 mb-3">Approve Appointment Request</h3>
                       <p className="text-green-700 text-sm mb-4">
-                        {showAlternatives 
+                        {showAlternatives
                           ? 'Confirm appointment with alternative scheduling options:'
                           : 'Confirm appointment with requested details:'
                         }

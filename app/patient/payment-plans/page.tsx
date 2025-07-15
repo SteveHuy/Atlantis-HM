@@ -76,8 +76,8 @@ export default function ManagePaymentPlansPage() {
     } catch (error: any) {
       const fieldErrors: Record<string, string> = {};
 
-      if (error.errors) {
-        error.errors.forEach((err: any) => {
+      if (error.issues) {
+        error.issues.forEach((err: any) => {
           const field = err.path[0];
           fieldErrors[field] = err.message;
         });

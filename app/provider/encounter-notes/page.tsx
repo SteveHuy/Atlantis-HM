@@ -48,29 +48,29 @@ export default function UpdateEncounterNotesPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients
     const patientsData = clinicalDataManager.getAllPatients();
     setPatients(patientsData);
-    
+
     setIsLoading(false);
   }, [router]);
 
   useEffect(() => {
     // Check for unsaved changes
     if (isEditing && selectedEncounter) {
-      const hasChanges = 
+      const hasChanges =
         encounterData.notes !== originalData.notes ||
         encounterData.treatmentPlan !== originalData.treatmentPlan ||
         JSON.stringify(encounterData.diagnoses) !== JSON.stringify(originalData.diagnoses);
-      
+
       setHasUnsavedChanges(hasChanges);
     }
   }, [encounterData, originalData, isEditing, selectedEncounter]);
@@ -78,16 +78,16 @@ export default function UpdateEncounterNotesPage() {
   const handlePatientSelect = (patientId: string) => {
     const patient = patients.find(p => p.id === patientId);
     setSelectedPatient(patient);
-    
+
     if (patient) {
       // Get encounters for this patient
       const patientEncounters = patient.encounters || [];
-      
+
       // Sort encounters by date (newest first)
-      const sortedEncounters = patientEncounters.sort((a: any, b: any) => 
+      const sortedEncounters = patientEncounters.sort((a: any, b: any) =>
         new Date(b.encounterDate).getTime() - new Date(a.encounterDate).getTime()
       );
-      
+
       setEncounters(sortedEncounters);
       setSelectedEncounter(null);
       setIsEditing(false);
@@ -102,7 +102,7 @@ export default function UpdateEncounterNotesPage() {
 
     setSelectedEncounter(encounter);
     setIsEditing(false);
-    
+
     const data = {
       encounterId: encounter.id,
       notes: encounter.notes || '',
@@ -110,7 +110,7 @@ export default function UpdateEncounterNotesPage() {
       diagnoses: encounter.diagnoses || [],
       providerId: user || ''
     };
-    
+
     setEncounterData(data);
     setOriginalData(data);
     setHasUnsavedChanges(false);
@@ -124,7 +124,7 @@ export default function UpdateEncounterNotesPage() {
       );
       if (!hasAuth) return;
     }
-    
+
     setIsEditing(true);
   };
 
@@ -133,7 +133,7 @@ export default function UpdateEncounterNotesPage() {
       const confirmDiscard = window.confirm("You have unsaved changes. Are you sure you want to discard them?");
       if (!confirmDiscard) return;
     }
-    
+
     setEncounterData(originalData);
     setIsEditing(false);
     setHasUnsavedChanges(false);
@@ -142,7 +142,7 @@ export default function UpdateEncounterNotesPage() {
 
   const handleInputChange = (field: string, value: string | string[]) => {
     setEncounterData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear validation error when user starts typing
     if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: '' }));
@@ -174,7 +174,7 @@ export default function UpdateEncounterNotesPage() {
 
     try {
       updateEncounterNotesSchema.parse(encounterData);
-      
+
       // Check for conflicts with existing records
       if (selectedEncounter && selectedEncounter.status === 'finalized') {
         // Additional validation for finalized records
@@ -182,10 +182,10 @@ export default function UpdateEncounterNotesPage() {
           errors.general = "Cannot save empty notes for finalized record";
         }
       }
-      
+
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
@@ -218,28 +218,28 @@ export default function UpdateEncounterNotesPage() {
 
       // Update encounter in system
       const updatedEncounter = clinicalDataManager.updateEncounter(encounterData.encounterId, updates);
-      
+
       if (updatedEncounter) {
         // Update local state
         setSelectedEncounter(updatedEncounter);
-        setEncounters(prev => prev.map(enc => 
+        setEncounters(prev => prev.map(enc =>
           enc.id === encounterData.encounterId ? updatedEncounter : enc
         ));
-        
+
         // Update original data
         setOriginalData(encounterData);
-        
+
         // Log encounter notes update for audit trail
         logClinicalAccess('update_encounter_notes', selectedPatient.id, session?.username || 'unknown');
-        
+
         setSuccess(true);
         setIsEditing(false);
         setHasUnsavedChanges(false);
-        
+
         // Hide success message after 3 seconds
         setTimeout(() => setSuccess(false), 3000);
       }
-      
+
     } catch (error) {
       console.error("Error saving encounter notes:", error);
       setValidationErrors({ general: "Failed to save encounter notes. Please try again." });
@@ -253,7 +253,7 @@ export default function UpdateEncounterNotesPage() {
       const confirmDiscard = window.confirm("You have unsaved changes. Are you sure you want to leave?");
       if (!confirmDiscard) return;
     }
-    
+
     router.push("/provider/dashboard");
   };
 
@@ -262,7 +262,7 @@ export default function UpdateEncounterNotesPage() {
       const confirmDiscard = window.confirm("You have unsaved changes. Are you sure you want to leave?");
       if (!confirmDiscard) return;
     }
-    
+
     if (selectedPatient) {
       router.push(`/provider/patient-ehr?patientId=${selectedPatient.id}`);
     } else {
@@ -317,7 +317,7 @@ export default function UpdateEncounterNotesPage() {
               </Button>
             )}
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Update Encounter Notes</h1>
           <p className="text-gray-600 mt-2">
             Review and update past encounter notes with comprehensive tracking and safeguards
@@ -353,7 +353,7 @@ export default function UpdateEncounterNotesPage() {
                 <User className="w-5 h-5 text-blue-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Select Patient</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <select
                   value={selectedPatient?.id || ''}
@@ -367,7 +367,7 @@ export default function UpdateEncounterNotesPage() {
                     </option>
                   ))}
                 </select>
-                
+
                 {selectedPatient && (
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm"><strong>DOB:</strong> {new Date(selectedPatient.dateOfBirth).toLocaleDateString()}</p>
@@ -384,7 +384,7 @@ export default function UpdateEncounterNotesPage() {
                   <Calendar className="w-5 h-5 text-green-600" />
                   <h2 className="text-xl font-semibold text-gray-900">Past Encounters</h2>
                 </div>
-                
+
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {encounters.map((encounter) => (
                     <button
@@ -406,8 +406,8 @@ export default function UpdateEncounterNotesPage() {
                           </p>
                           <div className="flex items-center space-x-2 mt-2">
                             <span className={`text-xs px-2 py-1 rounded-full ${
-                              encounter.status === 'finalized' 
-                                ? 'bg-green-100 text-green-800' 
+                              encounter.status === 'finalized'
+                                ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}>
                               {encounter.status}
@@ -434,7 +434,7 @@ export default function UpdateEncounterNotesPage() {
                     <FileText className="w-5 h-5 text-purple-600" />
                     <h2 className="text-xl font-semibold text-gray-900">Encounter Details</h2>
                   </div>
-                  
+
                   {!isEditing && (
                     <Button
                       onClick={handleStartEditing}

@@ -52,18 +52,18 @@ export default function GenerateReferralsPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients
     const patientsData = clinicalDataManager.getAllPatients();
     setPatients(patientsData);
-    
+
     setIsLoading(false);
   }, [router]);
 
@@ -140,7 +140,7 @@ export default function GenerateReferralsPage() {
       generateReferralSchema.parse(referralData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
@@ -173,17 +173,17 @@ export default function GenerateReferralsPage() {
 
       // Add referral to system
       const savedReferral = clinicalDataManager.addReferral(referral);
-      
+
       // Log referral generation for audit trail
       logClinicalAccess('generate_referral', referralData.patientId, session?.username || 'unknown');
-      
+
       setSuccess(true);
-      
+
       // Redirect to patient EHR after a short delay
       setTimeout(() => {
         router.push(`/provider/patient-ehr?patientId=${referralData.patientId}`);
       }, 3000);
-      
+
     } catch (error) {
       console.error("Error submitting referral:", error);
       setValidationErrors({ general: "Failed to submit referral. Please try again." });
@@ -265,7 +265,7 @@ export default function GenerateReferralsPage() {
               <span>Back to Dashboard</span>
             </button>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Generate Referral</h1>
           <p className="text-gray-600 mt-2">
             Generate referrals to specialists for your patients
@@ -301,7 +301,7 @@ export default function GenerateReferralsPage() {
                 <User className="w-5 h-5 text-blue-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Step 1: Select Patient</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -323,7 +323,7 @@ export default function GenerateReferralsPage() {
                     <p className="mt-2 text-sm text-red-600">{validationErrors.patientId}</p>
                   )}
                 </div>
-                
+
                 {selectedPatient && (
                   <div className="p-4 bg-blue-50 rounded-lg">
                     <h3 className="font-medium text-blue-900 mb-2">Patient Information</h3>
@@ -352,7 +352,7 @@ export default function GenerateReferralsPage() {
                 <FileText className="w-5 h-5 text-green-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Step 2: Referral Details</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -374,7 +374,7 @@ export default function GenerateReferralsPage() {
                     <p className="mt-2 text-sm text-red-600">{validationErrors.specialtyType}</p>
                   )}
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Reason for Referral *
@@ -396,7 +396,7 @@ export default function GenerateReferralsPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -412,7 +412,7 @@ export default function GenerateReferralsPage() {
                       <option value="stat">STAT</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Preferred Provider (Optional)
@@ -426,7 +426,7 @@ export default function GenerateReferralsPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Additional Notes
@@ -450,7 +450,7 @@ export default function GenerateReferralsPage() {
                 <Send className="w-5 h-5 text-purple-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Step 3: Review and Submit</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h3 className="font-medium text-gray-900 mb-3">Referral Summary</h3>
@@ -467,14 +467,14 @@ export default function GenerateReferralsPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Reason for Referral:</h4>
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-900">{referralPreview.reason}</p>
                   </div>
                 </div>
-                
+
                 {referralPreview.notes && (
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Additional Notes:</h4>
@@ -483,7 +483,7 @@ export default function GenerateReferralsPage() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-start space-x-2">
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
@@ -533,7 +533,7 @@ export default function GenerateReferralsPage() {
                 </Button>
               )}
             </div>
-            
+
             <div className="flex space-x-4">
               <Button
                 onClick={handleBackToDashboard}
@@ -542,7 +542,7 @@ export default function GenerateReferralsPage() {
               >
                 Cancel
               </Button>
-              
+
               {currentStep < 3 ? (
                 <Button
                   onClick={handleNextStep}

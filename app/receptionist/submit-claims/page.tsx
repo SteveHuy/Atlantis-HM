@@ -80,7 +80,7 @@ export default function SubmitClaimsPage() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<Record<keyof ClaimForm, string>> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path.length > 0) {
             const field = err.path[0] as keyof ClaimForm;
             fieldErrors[field] = err.message;
@@ -95,7 +95,7 @@ export default function SubmitClaimsPage() {
   const formatClaimToHIPAA5010 = () => {
     const currentDate = new Date().toISOString();
     const claimNum = `CLM-${Date.now()}`;
-    
+
     return {
       transactionSetId: "837",
       version: "005010X222A1",
@@ -124,7 +124,7 @@ export default function SubmitClaimsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -135,16 +135,16 @@ export default function SubmitClaimsPage() {
       // Format claim in HIPAA 5010 standard
       const formattedClaim = formatClaimToHIPAA5010();
       setClaimNumber(formattedClaim.claimNumber);
-      
+
       // Update audit log
       const newLogEntry = `${new Date().toLocaleString()}: Claim ${formattedClaim.claimNumber} submitted for patient ${selectedPatient?.name}`;
       setAuditLog(prev => [...prev, newLogEntry]);
 
       // Simulate API call to submit claim
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       setShowSuccess(true);
-      
+
       // Redirect to Track Claim Status after showing success
       setTimeout(() => {
         router.push('/receptionist/track-claims');
@@ -179,7 +179,7 @@ export default function SubmitClaimsPage() {
                 Claim number: <strong>{claimNumber}</strong>
               </p>
               <p className="text-sm text-gray-500 mb-4">
-                The claim has been formatted in HIPAA 5010 standard and submitted electronically. 
+                The claim has been formatted in HIPAA 5010 standard and submitted electronically.
                 You will be redirected to track the claim status.
               </p>
               <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"></div>

@@ -62,18 +62,18 @@ export default function TrackImmunizationsPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients
     const patientsData = clinicalDataManager.getAllPatients();
     setPatients(patientsData);
-    
+
     setIsLoading(false);
   }, [router]);
 
@@ -81,12 +81,12 @@ export default function TrackImmunizationsPage() {
     const patient = patients.find(p => p.id === patientId);
     setSelectedPatient(patient);
     setImmunizationData(prev => ({ ...prev, patientId }));
-    
+
     if (patient) {
       setImmunizationHistory(patient.immunizations || []);
       generateVaccineAlerts(patient);
     }
-    
+
     // Clear validation error when user selects a patient
     if (validationErrors.patientId) {
       setValidationErrors(prev => ({ ...prev, patientId: '' }));
@@ -97,19 +97,19 @@ export default function TrackImmunizationsPage() {
     const alerts: VaccineAlert[] = [];
     const patientAge = calculateAge(patient.dateOfBirth);
     const today = new Date();
-    
+
     // Mock vaccine schedule checking
     const requiredVaccines = [
       { name: 'COVID-19 mRNA', interval: 365, description: 'Annual booster' },
       { name: 'Influenza (seasonal)', interval: 365, description: 'Annual vaccination' },
       { name: 'Tetanus, diphtheria, pertussis (Tdap)', interval: 3650, description: 'Every 10 years' }
     ];
-    
+
     requiredVaccines.forEach(vaccine => {
-      const lastVaccination = patient.immunizations?.find((imm: any) => 
+      const lastVaccination = patient.immunizations?.find((imm: any) =>
         imm.vaccineName === vaccine.name
       );
-      
+
       if (!lastVaccination) {
         alerts.push({
           type: 'overdue',
@@ -120,9 +120,9 @@ export default function TrackImmunizationsPage() {
         const lastDate = new Date(lastVaccination.administrationDate);
         const nextDue = new Date(lastDate);
         nextDue.setDate(nextDue.getDate() + vaccine.interval);
-        
+
         const daysDiff = Math.ceil((nextDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
+
         if (daysDiff < 0) {
           alerts.push({
             type: 'overdue',
@@ -147,7 +147,7 @@ export default function TrackImmunizationsPage() {
         }
       }
     });
-    
+
     setVaccineAlerts(alerts);
   };
 
@@ -156,17 +156,17 @@ export default function TrackImmunizationsPage() {
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
-    
+
     return age;
   };
 
   const handleInputChange = (field: string, value: string) => {
     setImmunizationData(prev => ({ ...prev, [field]: value }));
-    
+
     // Auto-populate vaccine code when vaccine name is selected
     if (field === 'vaccineName') {
       const selectedVaccine = mockVaccines.find(v => v === value);
@@ -175,7 +175,7 @@ export default function TrackImmunizationsPage() {
         setImmunizationData(prev => ({ ...prev, vaccineCode }));
       }
     }
-    
+
     // Clear validation error when user starts typing
     if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: '' }));
@@ -196,7 +196,7 @@ export default function TrackImmunizationsPage() {
       'Varicella (chickenpox)': 'CVX-21',
       'Shingles (zoster)': 'CVX-187'
     };
-    
+
     return codeMappings[vaccineName] || 'CVX-999';
   };
 
@@ -207,7 +207,7 @@ export default function TrackImmunizationsPage() {
       trackImmunizationSchema.parse(immunizationData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
@@ -245,20 +245,20 @@ export default function TrackImmunizationsPage() {
 
       // Add immunization to patient record
       const savedImmunization = clinicalDataManager.addImmunization(immunizationData.patientId, immunization);
-      
+
       // Update immunization history
       setImmunizationHistory(prev => [...prev, savedImmunization]);
-      
+
       // Regenerate vaccine alerts
       if (selectedPatient) {
         generateVaccineAlerts(selectedPatient);
       }
-      
+
       // Log immunization tracking for audit trail
       logClinicalAccess('track_immunization', immunizationData.patientId, session?.username || 'unknown');
-      
+
       setSuccess(true);
-      
+
       // Reset form
       setImmunizationData({
         patientId: immunizationData.patientId,
@@ -275,10 +275,10 @@ export default function TrackImmunizationsPage() {
         nextDueDate: '',
         series: ''
       });
-      
+
       // Hide success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000);
-      
+
     } catch (error) {
       console.error("Error saving immunization:", error);
       setValidationErrors({ general: "Failed to save immunization information. Please try again." });
@@ -403,7 +403,7 @@ export default function TrackImmunizationsPage() {
               </div>
             )}
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Track Immunizations</h1>
           <p className="text-gray-600 mt-2">
             Track patient immunizations and maintain up-to-date vaccine histories
@@ -427,7 +427,7 @@ export default function TrackImmunizationsPage() {
               <User className="w-5 h-5 text-blue-600" />
               <h2 className="text-xl font-semibold text-gray-900">Patient Selection</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -449,7 +449,7 @@ export default function TrackImmunizationsPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.patientId}</p>
                 )}
               </div>
-              
+
               {selectedPatient && (
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <h3 className="font-medium text-blue-900 mb-2">Patient Information</h3>
@@ -471,7 +471,7 @@ export default function TrackImmunizationsPage() {
                 <AlertTriangle className="w-5 h-5 text-orange-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Vaccine Schedule Alerts</h2>
               </div>
-              
+
               <div className="space-y-3">
                 {vaccineAlerts.map((alert, index) => (
                   <div
@@ -499,7 +499,7 @@ export default function TrackImmunizationsPage() {
                 <Shield className="w-5 h-5 text-purple-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Immunization History</h2>
               </div>
-              
+
               <div className="space-y-3">
                 {immunizationHistory.map((immunization) => (
                   <div key={immunization.id} className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
@@ -511,9 +511,9 @@ export default function TrackImmunizationsPage() {
                         </span>
                       </div>
                       <p className="text-sm text-purple-700 mt-1">
-                        Administered: {new Date(immunization.administrationDate).toLocaleDateString()} • 
-                        Dosage: {immunization.dosage} • 
-                        Route: {immunization.route} • 
+                        Administered: {new Date(immunization.administrationDate).toLocaleDateString()} •
+                        Dosage: {immunization.dosage} •
+                        Route: {immunization.route} •
                         Site: {immunization.site}
                       </p>
                       {immunization.lotNumber && (
@@ -541,7 +541,7 @@ export default function TrackImmunizationsPage() {
                 <Shield className="w-5 h-5 text-green-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Add Immunization</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -564,7 +564,7 @@ export default function TrackImmunizationsPage() {
                       <p className="mt-2 text-sm text-red-600">{validationErrors.vaccineName}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Vaccine Code
@@ -578,7 +578,7 @@ export default function TrackImmunizationsPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -594,7 +594,7 @@ export default function TrackImmunizationsPage() {
                       <p className="mt-2 text-sm text-red-600">{validationErrors.administrationDate}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Next Due Date (Optional)
@@ -607,7 +607,7 @@ export default function TrackImmunizationsPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -624,7 +624,7 @@ export default function TrackImmunizationsPage() {
                       <p className="mt-2 text-sm text-red-600">{validationErrors.dosage}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Route *
@@ -641,7 +641,7 @@ export default function TrackImmunizationsPage() {
                       <option value="Intradermal">Intradermal</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Site *
@@ -660,7 +660,7 @@ export default function TrackImmunizationsPage() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -674,7 +674,7 @@ export default function TrackImmunizationsPage() {
                       className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Manufacturer *
@@ -691,7 +691,7 @@ export default function TrackImmunizationsPage() {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -705,7 +705,7 @@ export default function TrackImmunizationsPage() {
                       className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Notes (Optional)

@@ -9,22 +9,22 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Epic5MockDataManager, 
+import {
+  Epic5MockDataManager,
   type WaitlistEntry,
   mockProviders,
   mockServices
 } from '@/lib/epic5-mock-data';
-import { 
+import {
   waitlistEntrySchema,
   type WaitlistEntryData,
   sanitizeInput,
   validatePatientId
 } from '@/lib/epic5-validation';
-import { 
-  ArrowLeft, 
-  Clock, 
-  Plus, 
+import {
+  ArrowLeft,
+  Clock,
+  Plus,
   User,
   CheckCircle,
   XCircle,
@@ -40,7 +40,7 @@ export default function WaitingListPage() {
   const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isFullyBooked, setIsFullyBooked] = useState(false);
-  
+
   const [formData, setFormData] = useState<WaitlistEntryData>({
     patientId: '',
     preferredProvider: '',
@@ -49,7 +49,7 @@ export default function WaitingListPage() {
     endDate: '',
     timePreferences: []
   });
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -72,7 +72,7 @@ export default function WaitingListPage() {
     // }
 
     loadWaitlistEntries();
-    
+
     // Check if current schedule is fully booked (mock logic)
     const currentHour = new Date().getHours();
     setIsFullyBooked(currentHour % 2 === 0); // Mock: fully booked every even hour
@@ -89,7 +89,7 @@ export default function WaitingListPage() {
       ...prev,
       [field]: sanitizedValue
     }));
-    
+
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors(prev => {
@@ -104,7 +104,7 @@ export default function WaitingListPage() {
     const newPrefs = selectedTimePrefs.includes(preference)
       ? selectedTimePrefs.filter(p => p !== preference)
       : [...selectedTimePrefs, preference];
-    
+
     setSelectedTimePrefs(newPrefs);
     handleInputChange('timePreferences', newPrefs);
   };
@@ -112,19 +112,19 @@ export default function WaitingListPage() {
   const validateForm = (): boolean => {
     try {
       waitlistEntrySchema.parse(formData);
-      
+
       // Additional validation
       if (!validatePatientId(formData.patientId)) {
         setValidationErrors({ patientId: 'Patient ID must be in format P001-P999999' });
         return false;
       }
-      
+
       setValidationErrors({});
       return true;
-      
+
     } catch (error: any) {
       const errors: Record<string, string> = {};
-      error.errors?.forEach((err: any) => {
+      error.issues?.forEach((err: any) => {
         if (err.path) {
           errors[err.path[0]] = err.message;
         }
@@ -141,7 +141,7 @@ export default function WaitingListPage() {
     }
 
     setIsLoading(true);
-    
+
     try {
       const { startDate, endDate, ...restFormData } = formData;
       const newEntry = Epic5MockDataManager.addToWaitlist({
@@ -155,14 +155,14 @@ export default function WaitingListPage() {
         notified: false,
         status: 'active'
       });
-      
+
       setWaitlistEntries(prev => [...prev, newEntry]);
-      
-      setMessage({ 
-        type: 'success', 
-        text: `Patient ${formData.patientId} added to waiting list successfully. They are position #${newEntry.position} and will be notified when a slot becomes available.` 
+
+      setMessage({
+        type: 'success',
+        text: `Patient ${formData.patientId} added to waiting list successfully. They are position #${newEntry.position} and will be notified when a slot becomes available.`
       });
-      
+
       // Simulate automatic patient notification
       setTimeout(() => {
         setMessage(prev => prev ? {
@@ -170,7 +170,7 @@ export default function WaitingListPage() {
           text: prev.text + ' Notification sent to patient via SMS/email.'
         } : null);
       }, 1000);
-      
+
       // Reset form
       setFormData({
         patientId: '',
@@ -182,7 +182,7 @@ export default function WaitingListPage() {
       });
       setSelectedTimePrefs([]);
       setShowAddForm(false);
-      
+
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to add patient to waiting list. Please try again.' });
     } finally {
@@ -192,13 +192,13 @@ export default function WaitingListPage() {
 
   const handleRemoveFromWaitlist = async (entryId: string) => {
     const confirmed = window.confirm('Are you sure you want to remove this patient from the waiting list?');
-    
+
     if (confirmed) {
       // Mock removal logic
       setWaitlistEntries(prev => prev.filter(entry => entry.id !== entryId));
-      setMessage({ 
-        type: 'success', 
-        text: 'Patient removed from waiting list. They have been notified.' 
+      setMessage({
+        type: 'success',
+        text: 'Patient removed from waiting list. They have been notified.'
       });
     }
   };
@@ -211,9 +211,9 @@ export default function WaitingListPage() {
         type: 'success',
         text: `Slot available for ${entry.patientName}! They have been notified and have 24 hours to confirm.`
       });
-      
+
       // Update entry status
-      setWaitlistEntries(prev => prev.map(e => 
+      setWaitlistEntries(prev => prev.map(e =>
         e.id === entryId ? { ...e, status: 'notified', notified: true } : e
       ));
     }
@@ -243,7 +243,7 @@ export default function WaitingListPage() {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - addedDate.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return '1 day';
     return `${diffDays} days`;
@@ -261,7 +261,7 @@ export default function WaitingListPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Clock className="h-8 w-8 text-blue-600" />
@@ -270,7 +270,7 @@ export default function WaitingListPage() {
                 <p className="text-gray-600">Manage patient waiting list for appointments</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               {isFullyBooked && (
                 <Alert className="w-auto bg-orange-50 border-orange-200">
@@ -294,8 +294,8 @@ export default function WaitingListPage() {
 
         {message && (
           <Alert className={`mb-6 ${message.type === 'error' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
-            {message.type === 'error' ? 
-              <XCircle className="h-4 w-4 text-red-600" /> : 
+            {message.type === 'error' ?
+              <XCircle className="h-4 w-4 text-red-600" /> :
               <CheckCircle className="h-4 w-4 text-green-600" />
             }
             <AlertDescription className={message.type === 'error' ? 'text-red-800' : 'text-green-800'}>
@@ -313,7 +313,7 @@ export default function WaitingListPage() {
                 <p className="text-gray-600 mb-4">
                   There are currently available appointment slots. Patients can book directly without joining the waiting list.
                 </p>
-                <Button 
+                <Button
                   onClick={() => router.push('/receptionist/appointment-calendar')}
                   className="bg-green-600 hover:bg-green-700"
                 >
@@ -381,7 +381,7 @@ export default function WaitingListPage() {
                             </span>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className="font-medium text-gray-600">Preferred Provider:</span>
@@ -398,7 +398,7 @@ export default function WaitingListPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="mt-3">
                           <span className="font-medium text-gray-600 text-sm">Time Preferences:</span>
                           <div className="flex flex-wrap gap-1 mt-1">
@@ -409,7 +409,7 @@ export default function WaitingListPage() {
                             ))}
                           </div>
                         </div>
-                        
+
                         <div className="flex justify-between items-center mt-4 pt-3 border-t">
                           <div className="text-xs text-gray-500">
                             Added: {new Date(entry.addedAt).toLocaleString()}
@@ -454,7 +454,7 @@ export default function WaitingListPage() {
                   <p className="text-sm text-gray-600">Patients on waiting list</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Active Entries</CardTitle>
@@ -466,7 +466,7 @@ export default function WaitingListPage() {
                   <p className="text-sm text-gray-600">Currently waiting</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Avg. Wait Time</CardTitle>
@@ -477,7 +477,7 @@ export default function WaitingListPage() {
                 </CardContent>
               </Card>
             </div>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Popular Providers</CardTitle>
@@ -523,7 +523,7 @@ export default function WaitingListPage() {
                       <p className="text-red-500 text-sm mt-1">{validationErrors.patientId}</p>
                     )}
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="preferredProvider">Preferred Provider *</Label>
@@ -544,7 +544,7 @@ export default function WaitingListPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.preferredProvider}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="preferredService">Preferred Service *</Label>
                       <select
@@ -563,7 +563,7 @@ export default function WaitingListPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="startDate">Desired Start Date *</Label>
@@ -579,7 +579,7 @@ export default function WaitingListPage() {
                         <p className="text-red-500 text-sm mt-1">{validationErrors.startDate}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="endDate">Desired End Date *</Label>
                       <Input
@@ -595,7 +595,7 @@ export default function WaitingListPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label>Time Preferences *</Label>
                     <p className="text-sm text-gray-600 mb-3">Select at least one preferred time range</p>
@@ -616,7 +616,7 @@ export default function WaitingListPage() {
                       <p className="text-red-500 text-sm mt-1">{validationErrors.timePreferences}</p>
                     )}
                   </div>
-                  
+
                   {Object.keys(validationErrors).length > 0 && (
                     <Alert className="border-red-200 bg-red-50">
                       <AlertCircle className="h-4 w-4 text-red-600" />
@@ -626,7 +626,7 @@ export default function WaitingListPage() {
                     </Alert>
                   )}
                 </div>
-                
+
                 <div className="flex gap-3 mt-6">
                   <Button
                     onClick={() => {

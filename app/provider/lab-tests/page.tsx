@@ -48,18 +48,18 @@ export default function OrderLabTestsPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients
     const patientsData = clinicalDataManager.getPatients();
     setPatients(patientsData);
-    
+
     setIsLoading(false);
   }, [router]);
 
@@ -81,7 +81,7 @@ export default function OrderLabTestsPage() {
     const patient = patients.find(p => p.id === patientId);
     setSelectedPatient(patient);
     setFormData(prev => ({ ...prev, patientId }));
-    
+
     // Check for potential conflicts when patient is selected
     if (patient && formData.testName) {
       checkForConflicts(patient, formData.testName);
@@ -94,7 +94,7 @@ export default function OrderLabTestsPage() {
       testName: test.name,
       testCode: test.code
     }));
-    
+
     // Check for potential conflicts when test is selected
     if (selectedPatient) {
       checkForConflicts(selectedPatient, test.name);
@@ -103,7 +103,7 @@ export default function OrderLabTestsPage() {
 
   const checkForConflicts = (patient: any, testName: string) => {
     const conflicts: ConflictWarning[] = [];
-    
+
     // Check for recent similar orders (within 30 days)
     const recentLabResults = clinicalDataManager.getPatientLabResults(patient.id).filter((result: any) => {
       const resultDate = new Date(result.orderDate);
@@ -111,7 +111,7 @@ export default function OrderLabTestsPage() {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       return resultDate > thirtyDaysAgo && result.testName === testName;
     });
-    
+
     if (recentLabResults.length > 0) {
       conflicts.push({
         type: 'recent_order',
@@ -119,12 +119,12 @@ export default function OrderLabTestsPage() {
         severity: 'medium'
       });
     }
-    
+
     // Check for duplicate pending orders
-    const pendingOrders = clinicalDataManager.getPatientLabResults(patient.id).filter((result: any) => 
+    const pendingOrders = clinicalDataManager.getPatientLabResults(patient.id).filter((result: any) =>
       result.status === 'pending' && result.testName === testName
     );
-    
+
     if (pendingOrders.length > 0) {
       conflicts.push({
         type: 'duplicate_test',
@@ -132,15 +132,15 @@ export default function OrderLabTestsPage() {
         severity: 'high'
       });
     }
-    
+
     // Check for potential medication conflicts (mock logic)
     if (testName.toLowerCase().includes('liver') || testName.toLowerCase().includes('hepatic')) {
       const patientRecords = clinicalDataManager.getPatientMedicalRecords(patient.id);
-      const hepatotoxicMeds = patientRecords.medications.filter((med: any) => 
-        med.status === 'active' && 
+      const hepatotoxicMeds = patientRecords.medications.filter((med: any) =>
+        med.status === 'active' &&
         (med.name.toLowerCase().includes('acetaminophen') || med.name.toLowerCase().includes('statins'))
       );
-      
+
       if (hepatotoxicMeds.length > 0) {
         conflicts.push({
           type: 'conflicting_medication',
@@ -149,7 +149,7 @@ export default function OrderLabTestsPage() {
         });
       }
     }
-    
+
     setWarnings(conflicts);
   };
 
@@ -168,7 +168,7 @@ export default function OrderLabTestsPage() {
       orderLabTestSchema.parse(formData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
@@ -204,17 +204,17 @@ export default function OrderLabTestsPage() {
 
       // Add lab result to patient record
       const savedLabResult = clinicalDataManager.addLabResult(formData.patientId, labOrder);
-      
-      // Log lab test order for audit trail  
+
+      // Log lab test order for audit trail
       logClinicalAccess('order_lab_test', formData.patientId, session?.username || 'unknown');
-      
+
       setSuccess(true);
-      
+
       // Redirect to patient EHR after a short delay
       setTimeout(() => {
         router.push(`/provider/patient-ehr?patientId=${formData.patientId}`);
       }, 2000);
-      
+
     } catch (error) {
       console.error("Error submitting lab order:", error);
       setValidationErrors({ general: "Failed to submit lab order. Please try again." });
@@ -286,7 +286,7 @@ export default function OrderLabTestsPage() {
               <span>Back to Dashboard</span>
             </button>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Order Lab Tests</h1>
           <p className="text-gray-600 mt-2">
             Order and track lab tests directly within the system
@@ -301,7 +301,7 @@ export default function OrderLabTestsPage() {
               <User className="w-5 h-5 text-blue-600" />
               <h2 className="text-xl font-semibold text-gray-900">Patient Selection</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -323,7 +323,7 @@ export default function OrderLabTestsPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.patientId}</p>
                 )}
               </div>
-              
+
               {selectedPatient && (
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <h3 className="font-medium text-blue-900 mb-2">Patient Information</h3>
@@ -343,7 +343,7 @@ export default function OrderLabTestsPage() {
               <TestTube className="w-5 h-5 text-green-600" />
               <h2 className="text-xl font-semibold text-gray-900">Test Selection</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -360,7 +360,7 @@ export default function OrderLabTestsPage() {
                   <Search className="absolute right-3 top-3 h-6 w-6 text-gray-400" />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto">
                 {filteredTests.map((test) => (
                   <button
@@ -381,14 +381,14 @@ export default function OrderLabTestsPage() {
                   </button>
                 ))}
               </div>
-              
+
               {formData.testName && (
                 <div className="p-4 bg-green-50 rounded-lg">
                   <h3 className="font-medium text-green-900 mb-2">Selected Test</h3>
                   <p className="text-sm text-green-800">{formData.testName} ({formData.testCode})</p>
                 </div>
               )}
-              
+
               {validationErrors.testName && (
                 <p className="text-sm text-red-600">{validationErrors.testName}</p>
               )}
@@ -402,7 +402,7 @@ export default function OrderLabTestsPage() {
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Warnings</h2>
               </div>
-              
+
               <div className="space-y-3">
                 {warnings.map((warning, index) => (
                   <div
@@ -450,7 +450,7 @@ export default function OrderLabTestsPage() {
               <Calendar className="w-5 h-5 text-purple-600" />
               <h2 className="text-xl font-semibold text-gray-900">Order Details</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -469,7 +469,7 @@ export default function OrderLabTestsPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.priority}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Additional Notes
@@ -485,7 +485,7 @@ export default function OrderLabTestsPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.notes}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Ordering Provider

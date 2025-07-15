@@ -46,18 +46,18 @@ export default function UpdateAllergyInfoPage() {
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
-    
+
     // Load patients
     const patientsData = clinicalDataManager.getAllPatients();
     setPatients(patientsData);
-    
+
     setIsLoading(false);
   }, [router]);
 
@@ -65,16 +65,16 @@ export default function UpdateAllergyInfoPage() {
     const patient = patients.find(p => p.id === patientId);
     setSelectedPatient(patient);
     setAllergyData(prev => ({ ...prev, patientId }));
-    
+
     if (patient) {
       setExistingAllergies(patient.allergies || []);
-      
+
       // Check for drug interactions with current medications
       if (allergyData.allergen) {
         checkInteractions(patient, allergyData.allergen);
       }
     }
-    
+
     // Clear validation error when user selects a patient
     if (validationErrors.patientId) {
       setValidationErrors(prev => ({ ...prev, patientId: '' }));
@@ -85,19 +85,19 @@ export default function UpdateAllergyInfoPage() {
     const activeMedications = patient.medications
       .filter((med: any) => med.status === 'active')
       .map((med: any) => med.name);
-    
+
     const interactions = checkDrugAllergies([allergen], activeMedications);
     setDrugInteractions(interactions);
   };
 
   const handleInputChange = (field: string, value: string) => {
     setAllergyData(prev => ({ ...prev, [field]: value }));
-    
+
     // Check for drug interactions when allergen changes
     if (field === 'allergen' && selectedPatient && value) {
       checkInteractions(selectedPatient, value);
     }
-    
+
     // Clear validation error when user starts typing
     if (validationErrors[field]) {
       setValidationErrors(prev => ({ ...prev, [field]: '' }));
@@ -111,7 +111,7 @@ export default function UpdateAllergyInfoPage() {
       updateAllergySchema.parse(allergyData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
@@ -144,15 +144,15 @@ export default function UpdateAllergyInfoPage() {
 
       // Add allergy to patient record
       const savedAllergy = clinicalDataManager.addAllergy(allergyData.patientId, allergy);
-      
+
       // Update existing allergies display
       setExistingAllergies(prev => [...prev, savedAllergy]);
-      
+
       // Log allergy update for audit trail
       logClinicalAccess('update_allergy_info', allergyData.patientId, session?.username || 'unknown');
-      
+
       setSuccess(true);
-      
+
       // Reset form
       setAllergyData({
         patientId: allergyData.patientId,
@@ -164,13 +164,13 @@ export default function UpdateAllergyInfoPage() {
         onsetDate: '',
         providerId: allergyData.providerId
       });
-      
+
       // Clear interactions
       setDrugInteractions([]);
-      
+
       // Hide success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000);
-      
+
     } catch (error) {
       console.error("Error saving allergy:", error);
       setValidationErrors({ general: "Failed to save allergy information. Please try again." });
@@ -256,7 +256,7 @@ export default function UpdateAllergyInfoPage() {
               </Button>
             )}
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900">Update Allergy Information</h1>
           <p className="text-gray-600 mt-2">
             Safely update patient allergy information with comprehensive tracking and drug interaction alerts
@@ -280,7 +280,7 @@ export default function UpdateAllergyInfoPage() {
               <User className="w-5 h-5 text-blue-600" />
               <h2 className="text-xl font-semibold text-gray-900">Patient Selection</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -302,7 +302,7 @@ export default function UpdateAllergyInfoPage() {
                   <p className="mt-2 text-sm text-red-600">{validationErrors.patientId}</p>
                 )}
               </div>
-              
+
               {selectedPatient && (
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <h3 className="font-medium text-blue-900 mb-2">Patient Information</h3>
@@ -335,7 +335,7 @@ export default function UpdateAllergyInfoPage() {
                   <span>{showHistory ? 'Hide' : 'View'} History</span>
                 </Button>
               </div>
-              
+
               <div className="space-y-3">
                 {existingAllergies.map((allergy) => (
                   <div key={allergy.id} className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
@@ -375,7 +375,7 @@ export default function UpdateAllergyInfoPage() {
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
                 <h2 className="text-xl font-semibold text-yellow-900">Drug Interaction Alert</h2>
               </div>
-              
+
               <div className="space-y-2">
                 {drugInteractions.map((interaction, index) => (
                   <div key={index} className="p-3 bg-yellow-100 rounded-lg">
@@ -393,7 +393,7 @@ export default function UpdateAllergyInfoPage() {
                 <Plus className="w-5 h-5 text-green-600" />
                 <h2 className="text-xl font-semibold text-gray-900">Add New Allergy</h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -411,7 +411,7 @@ export default function UpdateAllergyInfoPage() {
                       <p className="mt-2 text-sm text-red-600">{validationErrors.allergen}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Allergen Type *
@@ -428,7 +428,7 @@ export default function UpdateAllergyInfoPage() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -444,7 +444,7 @@ export default function UpdateAllergyInfoPage() {
                       <option value="high">High</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Onset Date (Optional)
@@ -457,7 +457,7 @@ export default function UpdateAllergyInfoPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Reaction *
@@ -473,7 +473,7 @@ export default function UpdateAllergyInfoPage() {
                     <p className="mt-2 text-sm text-red-600">{validationErrors.reaction}</p>
                   )}
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Additional Notes (Optional)

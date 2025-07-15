@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Pill, 
-  Check, 
-  X, 
-  ArrowLeft, 
+import {
+  Pill,
+  Check,
+  X,
+  ArrowLeft,
   AlertTriangle,
   User,
   Clock,
@@ -18,13 +18,13 @@ import {
   Download
 } from 'lucide-react';
 import { sessionManager, type UserSession } from '@/lib/epic3-mock-data';
-import { 
-  serviceProviderDataManager, 
+import {
+  serviceProviderDataManager,
   mockMedications,
   mockPharmacies,
   type PrescriptionRefill,
   type Medication,
-  type Pharmacy 
+  type Pharmacy
 } from '@/lib/service-provider-mock-data';
 import { managePrescriptionRefillsSchema } from '@/lib/service-provider-validation';
 
@@ -37,35 +37,35 @@ export default function ManagePrescriptionRefillsPage() {
   const router = useRouter();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Data state
   const [pendingRefills, setPendingRefills] = useState<RefillWithDetails[]>([]);
   const [selectedRefill, setSelectedRefill] = useState<RefillWithDetails | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  
+
   // Action state
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingError, setProcessingError] = useState('');
   const [processingSuccess, setProcessingSuccess] = useState('');
-  
+
   // Form state for denial
   const [denialReason, setDenialReason] = useState('');
   const [selectedPharmacy, setSelectedPharmacy] = useState('');
   const [showDenialForm, setShowDenialForm] = useState(false);
   const [showApprovalForm, setShowApprovalForm] = useState(false);
-  
+
   // Drug interaction alerts
   const [drugInteractions, setDrugInteractions] = useState<string[]>([]);
   const [showInteractionAlert, setShowInteractionAlert] = useState(false);
 
   useEffect(() => {
     const userSession = sessionManager.getSession();
-    
+
     if (!userSession || userSession.role !== 'provider') {
       router.push('/provider/login');
       return;
     }
-    
+
     setSession(userSession);
     loadPendingRefills();
     setIsLoading(false);
@@ -73,24 +73,24 @@ export default function ManagePrescriptionRefillsPage() {
 
   const loadPendingRefills = () => {
     const refills = serviceProviderDataManager.getPendingRefills();
-    
+
     // Enhance refills with medication and pharmacy details
     const enhancedRefills: RefillWithDetails[] = refills.map(refill => ({
       ...refill,
-      medicationDetails: mockMedications.find(med => 
+      medicationDetails: mockMedications.find(med =>
         med.name.toLowerCase().includes(refill.medicationName.toLowerCase().split(' ')[0])
       ),
-      pharmacyDetails: refill.pharmacyId ? 
+      pharmacyDetails: refill.pharmacyId ?
         mockPharmacies.find(pharmacy => pharmacy.id === refill.pharmacyId) : undefined
     }));
-    
+
     setPendingRefills(enhancedRefills);
   };
 
   const handleViewDetails = (refill: RefillWithDetails) => {
     setSelectedRefill(refill);
     setShowDetails(true);
-    
+
     // Check for drug interactions
     if (refill.medicationDetails) {
       const interactions = refill.medicationDetails.commonInteractions;
@@ -115,7 +115,7 @@ export default function ManagePrescriptionRefillsPage() {
 
   const confirmApproval = async () => {
     if (!selectedRefill || !session) return;
-    
+
     setProcessingError('');
     setProcessingSuccess('');
     setIsProcessing(true);
@@ -129,7 +129,7 @@ export default function ManagePrescriptionRefillsPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map((e: any) => e.message).join(', ');
+        const errors = validationResult.error.issues.map((e: any) => e.message).join(', ');
         setProcessingError(errors);
         setIsProcessing(false);
         return;
@@ -137,21 +137,21 @@ export default function ManagePrescriptionRefillsPage() {
 
       // Process approval
       const success = serviceProviderDataManager.approveRefill(
-        selectedRefill.id, 
-        session.userId, 
+        selectedRefill.id,
+        session.userId,
         selectedPharmacy
       );
 
       if (success) {
         setProcessingSuccess(`Prescription refill approved and sent to pharmacy`);
-        
+
         // Update local state
         setPendingRefills(prev => prev.filter(r => r.id !== selectedRefill.id));
-        
+
         // Close forms
         setShowApprovalForm(false);
         setSelectedRefill(null);
-        
+
         // Auto-hide success message
         setTimeout(() => setProcessingSuccess(''), 3000);
       } else {
@@ -168,7 +168,7 @@ export default function ManagePrescriptionRefillsPage() {
 
   const confirmDenial = async () => {
     if (!selectedRefill || !session || !denialReason.trim()) return;
-    
+
     setProcessingError('');
     setProcessingSuccess('');
     setIsProcessing(true);
@@ -182,7 +182,7 @@ export default function ManagePrescriptionRefillsPage() {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map((e: any) => e.message).join(', ');
+        const errors = validationResult.error.issues.map((e: any) => e.message).join(', ');
         setProcessingError(errors);
         setIsProcessing(false);
         return;
@@ -190,22 +190,22 @@ export default function ManagePrescriptionRefillsPage() {
 
       // Process denial
       const success = serviceProviderDataManager.denyRefill(
-        selectedRefill.id, 
-        session.userId, 
+        selectedRefill.id,
+        session.userId,
         denialReason.trim()
       );
 
       if (success) {
         setProcessingSuccess(`Prescription refill denied and patient notified`);
-        
+
         // Update local state
         setPendingRefills(prev => prev.filter(r => r.id !== selectedRefill.id));
-        
+
         // Close forms
         setShowDenialForm(false);
         setSelectedRefill(null);
         setDenialReason('');
-        
+
         // Auto-hide success message
         setTimeout(() => setProcessingSuccess(''), 3000);
       } else {
@@ -229,7 +229,7 @@ export default function ManagePrescriptionRefillsPage() {
       totalRefills: pendingRefills.length,
       refills: pendingRefills
     };
-    
+
     // In a real app, this would generate a PDF or CSV
     console.log('Refill Report Generated:', reportData);
     alert('Refill report generated and ready for download (mock)');
@@ -268,7 +268,7 @@ export default function ManagePrescriptionRefillsPage() {
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">Manage Prescription Refills</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
@@ -365,7 +365,7 @@ export default function ManagePrescriptionRefillsPage() {
                             {new Date(refill.requestDate).toLocaleDateString()}
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                           <div>
                             <p className="text-sm text-gray-600">Medication</p>
@@ -531,7 +531,7 @@ export default function ManagePrescriptionRefillsPage() {
               <div className="space-y-4">
                 <div className="p-3 bg-green-50 border border-green-200 rounded">
                   <p className="text-sm text-green-800">
-                    <strong>Patient:</strong> {selectedRefill.patientName} | 
+                    <strong>Patient:</strong> {selectedRefill.patientName} |
                     <strong> Medication:</strong> {selectedRefill.medicationName}
                   </p>
                 </div>
@@ -604,7 +604,7 @@ export default function ManagePrescriptionRefillsPage() {
               <div className="space-y-4">
                 <div className="p-3 bg-red-50 border border-red-200 rounded">
                   <p className="text-sm text-red-800">
-                    <strong>Patient:</strong> {selectedRefill.patientName} | 
+                    <strong>Patient:</strong> {selectedRefill.patientName} |
                     <strong> Medication:</strong> {selectedRefill.medicationName}
                   </p>
                 </div>

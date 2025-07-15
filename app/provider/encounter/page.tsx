@@ -156,7 +156,7 @@ export default function DocumentPatientEncounterPage() {
 
     } catch (error) {
       if (error instanceof z.ZodError) {
-        error.errors.forEach((err: any) => {
+        error.issues.forEach((err: any) => {
           if (err.path.length > 0) {
             errors[err.path.join('.')] = err.message;
           }
