@@ -10,7 +10,7 @@ import { ArrowLeft, Send, Paperclip, Shield, Clock, User, AlertCircle } from 'lu
 import { useRouter } from 'next/navigation';
 import { communicationDataManager, SecureMessage, Provider } from '@/lib/communication-mock-data';
 import { secureMessageSchema, SecureMessageFormData } from '@/lib/communication-validation';
-import { sessionManager } from '@/lib/session-manager';
+import { sessionManager } from '@/lib/epic3-mock-data';
 
 interface ComposeMessageModalProps {
   isOpen: boolean;
