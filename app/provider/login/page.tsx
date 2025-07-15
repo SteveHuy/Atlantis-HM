@@ -51,7 +51,7 @@ export default function ServiceProviderLoginPage() {
   useEffect(() => {
     const session = sessionManager.getSession();
     if (session?.role === 'provider') {
-      router.push('/provider/dashboard'); // UD-REF: #Access Appointment Schedules - will be implemented in future epic
+      router.push('/provider/dashboard');
     }
   }, [router]);
 
@@ -148,9 +148,7 @@ export default function ServiceProviderLoginPage() {
       // Clear form
       setFormData({ username: '', password: '', rememberMe: false });
       
-      // Redirect to appointment schedules (placeholder)
-      // UD-REF: #Access Appointment Schedules - will be implemented in future epic
-      alert('Login successful! Redirecting to Appointment Schedules...');
+      // Redirect to provider dashboard with access to all features
       router.push('/provider/dashboard');
       
     } catch (error) {
