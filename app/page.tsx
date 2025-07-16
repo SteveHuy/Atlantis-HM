@@ -154,7 +154,7 @@ export default function Home() {
               </div>
 
               {/* Medical Icons Overlay */}
-              <div className="absolute top-4 right-4 flex space-x-2 opacity-30">
+              <div className="absolute top-3 right-4 flex space-x-2 opacity-30">
                 <div className="w-6 h-6 bg-red-400 rounded-full flex items-center justify-center">
                   <div className="w-3 h-3 bg-white rounded-full"></div>
                 </div>
