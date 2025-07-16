@@ -131,7 +131,7 @@ export default function PatientRegister() {
       console.log("Sending verification email to:", data.email);
 
       // Show success message
-      alert("Registration successful, please verify your email");
+      // alert("Registration successful, please verify your email");
 
       router.push('/patient/schedule-appointment');
 

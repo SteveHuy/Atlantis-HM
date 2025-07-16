@@ -75,9 +75,92 @@ export default function Home() {
           </p>
           <div className="mt-12">
             <div className="relative w-full max-w-4xl mx-auto h-64 bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-20"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-gray-600 text-lg">Professional Healthcare Management Interface</p>
+              {/* Dashboard Header */}
+              <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center px-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-6 h-6 bg-white rounded-full opacity-90"></div>
+                  <div className="h-4 w-32 bg-white rounded opacity-80"></div>
+                </div>
+                <div className="ml-auto flex space-x-2">
+                  <div className="w-6 h-6 bg-white rounded opacity-70"></div>
+                  <div className="w-6 h-6 bg-white rounded opacity-70"></div>
+                </div>
+              </div>
+
+              {/* Main Dashboard Content */}
+              <div className="absolute top-12 left-0 right-0 bottom-0 p-4 bg-gray-50">
+                <div className="grid grid-cols-12 gap-3 h-full">
+                  {/* Left Panel - Patient List */}
+                  <div className="col-span-4 bg-white rounded-lg shadow-sm p-3">
+                    <div className="h-4 w-24 bg-blue-200 rounded mb-2"></div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-green-100 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="h-3 w-20 bg-gray-200 rounded"></div>
+                          <div className="h-2 w-16 bg-gray-100 rounded mt-1"></div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-yellow-100 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                          <div className="h-2 w-20 bg-gray-100 rounded mt-1"></div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="h-3 w-18 bg-gray-200 rounded"></div>
+                          <div className="h-2 w-14 bg-gray-100 rounded mt-1"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Center Panel - Chart/Analytics */}
+                  <div className="col-span-5 bg-white rounded-lg shadow-sm p-3">
+                    <div className="h-4 w-32 bg-purple-200 rounded mb-2"></div>
+                    <div className="flex items-end space-x-1 h-24">
+                      <div className="w-4 bg-blue-300 rounded-t" style={{height: '40%'}}></div>
+                      <div className="w-4 bg-green-300 rounded-t" style={{height: '70%'}}></div>
+                      <div className="w-4 bg-purple-300 rounded-t" style={{height: '50%'}}></div>
+                      <div className="w-4 bg-yellow-300 rounded-t" style={{height: '80%'}}></div>
+                      <div className="w-4 bg-pink-300 rounded-t" style={{height: '60%'}}></div>
+                      <div className="w-4 bg-indigo-300 rounded-t" style={{height: '90%'}}></div>
+                      <div className="w-4 bg-red-300 rounded-t" style={{height: '45%'}}></div>
+                    </div>
+                  </div>
+
+                  {/* Right Panel - Quick Actions */}
+                  <div className="col-span-3 bg-white rounded-lg shadow-sm p-3">
+                    <div className="h-4 w-28 bg-green-200 rounded mb-2"></div>
+                    <div className="space-y-2">
+                      <div className="h-8 bg-blue-100 rounded flex items-center px-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+                        <div className="h-2 w-16 bg-blue-400 rounded"></div>
+                      </div>
+                      <div className="h-8 bg-green-100 rounded flex items-center px-2">
+                        <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                        <div className="h-2 w-20 bg-green-400 rounded"></div>
+                      </div>
+                      <div className="h-8 bg-purple-100 rounded flex items-center px-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded mr-2"></div>
+                        <div className="h-2 w-18 bg-purple-400 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Medical Icons Overlay */}
+              <div className="absolute top-4 right-4 flex space-x-2 opacity-30">
+                <div className="w-6 h-6 bg-red-400 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+                <div className="w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-1 bg-white rounded"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -211,7 +294,7 @@ export default function Home() {
               </p>
               <div className="space-y-3">
                 <Link href="/patient/login">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" aria-label="Go to patient login">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 mb-3" aria-label="Go to patient login">
                     Patient Login
                   </Button>
                 </Link>
