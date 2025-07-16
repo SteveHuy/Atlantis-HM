@@ -12,6 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogClose 
+} from "@/components/ui/dialog";
+import { 
   Calendar, 
   Clock, 
   MapPin, 
@@ -60,7 +68,6 @@ export default function AppointmentHistoryPage() {
     totalPages: 0,
     filters: {}
   });
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -380,7 +387,7 @@ export default function AppointmentHistoryPage() {
                         </div>
                       </div>
                       
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                      <span className={`mr-2 mt-1 inline-block px-2 py-1 text-xs rounded-full ${
                         getStatusColor(appointment.status) === 'green' ? 'bg-green-100 text-green-800' :
                         getStatusColor(appointment.status) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
                         getStatusColor(appointment.status) === 'red' ? 'bg-red-100 text-red-800' :
@@ -441,14 +448,121 @@ export default function AppointmentHistoryPage() {
                   </div>
 
                   {/* View Details Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedAppointment(appointment)}
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    View Details
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Details
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Appointment Details</DialogTitle>
+                      </DialogHeader>
+
+                      <div className="space-y-6">
+                        {/* Provider Info */}
+                        <div className="flex items-center space-x-4">
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                            <User className="w-8 h-8 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {appointment.providerName}
+                            </h3>
+                            <p className="text-gray-600">{appointment.serviceType}</p>
+                            <span className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${
+                              getStatusColor(appointment.status) === 'green' ? 'bg-green-100 text-green-800' :
+                              getStatusColor(appointment.status) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                              getStatusColor(appointment.status) === 'red' ? 'bg-red-100 text-red-800' :
+                              getStatusColor(appointment.status) === 'blue' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {getStatusLabel(appointment.status)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Appointment Details */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div className="flex items-center space-x-3">
+                              <Calendar className="w-5 h-5 text-gray-400" />
+                              <div>
+                                <span className="font-medium text-gray-700">Date</span>
+                                <p className="text-gray-600">
+                                  {formatDateForDisplay(appointment.date)}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3">
+                              <Clock className="w-5 h-5 text-gray-400" />
+                              <div>
+                                <span className="font-medium text-gray-700">Time</span>
+                                <p className="text-gray-600">
+                                  {formatTimeForDisplay(appointment.time)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="flex items-center space-x-3">
+                              <MapPin className="w-5 h-5 text-gray-400" />
+                              <div>
+                                <span className="font-medium text-gray-700">Location</span>
+                                <p className="text-gray-600">{appointment.location}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3">
+                              <Calendar className="w-5 h-5 text-gray-400" />
+                              <div>
+                                <span className="font-medium text-gray-700">Booked On</span>
+                                <p className="text-gray-600">
+                                  {new Date(appointment.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        {appointment.notes && (
+                          <div>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <FileText className="w-5 h-5 text-gray-400" />
+                              <span className="font-medium text-gray-700">Clinical Notes</span>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                              <p className="text-gray-700 whitespace-pre-wrap">
+                                {appointment.notes}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Feedback */}
+                        {appointment.feedback && (
+                          <div>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Star className="w-5 h-5 text-gray-400" />
+                              <span className="font-medium text-gray-700">Your Feedback</span>
+                            </div>
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                              <p className="text-gray-700 whitespace-pre-wrap">
+                                {appointment.feedback}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </Card>
             ))}
@@ -508,124 +622,7 @@ export default function AppointmentHistoryPage() {
           </div>
         )}
 
-        {/* Appointment Details Modal */}
-        {selectedAppointment && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Appointment Details</h2>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedAppointment(null)}
-                  >
-                    Close
-                  </Button>
-                </div>
 
-                <div className="space-y-6">
-                  {/* Provider Info */}
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {selectedAppointment.providerName}
-                      </h3>
-                      <p className="text-gray-600">{selectedAppointment.serviceType}</p>
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${
-                        getStatusColor(selectedAppointment.status) === 'green' ? 'bg-green-100 text-green-800' :
-                        getStatusColor(selectedAppointment.status) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                        getStatusColor(selectedAppointment.status) === 'red' ? 'bg-red-100 text-red-800' :
-                        getStatusColor(selectedAppointment.status) === 'blue' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {getStatusLabel(selectedAppointment.status)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Appointment Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <span className="font-medium text-gray-700">Date</span>
-                          <p className="text-gray-600">
-                            {formatDateForDisplay(selectedAppointment.date)}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <Clock className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <span className="font-medium text-gray-700">Time</span>
-                          <p className="text-gray-600">
-                            {formatTimeForDisplay(selectedAppointment.time)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <span className="font-medium text-gray-700">Location</span>
-                          <p className="text-gray-600">{selectedAppointment.location}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <span className="font-medium text-gray-700">Booked On</span>
-                          <p className="text-gray-600">
-                            {new Date(selectedAppointment.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  {selectedAppointment.notes && (
-                    <div>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <FileText className="w-5 h-5 text-gray-400" />
-                        <span className="font-medium text-gray-700">Clinical Notes</span>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-gray-700 whitespace-pre-wrap">
-                          {selectedAppointment.notes}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Feedback */}
-                  {selectedAppointment.feedback && (
-                    <div>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Star className="w-5 h-5 text-gray-400" />
-                        <span className="font-medium text-gray-700">Your Feedback</span>
-                      </div>
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <p className="text-gray-700 whitespace-pre-wrap">
-                          {selectedAppointment.feedback}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          </div>
-        )}
       </div>
     </div>
   );
