@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-You MUST ALWAYS log ALL your activity within "claude.log" such as your TODO plan and the individiual steps within the TODO plan.
-
 # 🧱 Userdoc Project Guideline
 
 First, you have to check you can connect to a Userdoc MCP server if you cannot connect to the MCP stop immediately and respond with "I cannot access Userdoc".
