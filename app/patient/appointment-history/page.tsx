@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +22,11 @@ import {
   Eye,
   FileText,
   Star,
-  MessageSquare
+  MessageSquare,
+  Bell,
+  Settings,
+  Shield,
+  LogOut
 } from "lucide-react";
 import { 
   appointmentHistoryFiltersSchema, 
@@ -32,6 +39,9 @@ import {
   Epic4MockDataManager, 
   type Appointment
 } from "@/lib/epic4-mock-data";
+import { mockPatient } from "@/lib/mockDashboardData";
+import { dashboardLogger } from "@/lib/logger";
+import { SearchBar } from "@/components/patient/search-bar";
 
 interface AppointmentHistoryState {
   appointments: Appointment[];
@@ -42,6 +52,7 @@ interface AppointmentHistoryState {
 }
 
 export default function AppointmentHistoryPage() {
+  const router = useRouter();
   const [historyState, setHistoryState] = useState<AppointmentHistoryState>({
     appointments: [],
     total: 0,
@@ -63,6 +74,27 @@ export default function AppointmentHistoryPage() {
   } = useForm<AppointmentHistoryFiltersData>({
     resolver: zodResolver(appointmentHistoryFiltersSchema)
   });
+
+  // Handle search feature selection
+  const handleFeatureSelect = (featureId: string) => {
+    switch (featureId) {
+      case 'messages':
+        router.push('/patient/messages');
+        break;
+      case 'appointment-history':
+        router.push('/patient/appointment-history');
+        break;
+      case 'appointment-reminders':
+        router.push('/patient/appointment-reminders');
+        break;
+      case 'medical-records':
+        router.push('/patient/medical-records');
+        break;
+      default:
+        alert(`Feature will be implemented in future epic`);
+        break;
+    }
+  };
 
   // Load appointments on mount
   useEffect(() => {
@@ -145,8 +177,73 @@ export default function AppointmentHistoryPage() {
   const allProviders = Epic4MockDataManager.getProviders();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Link href="/patient/dashboard">
+                <Image
+                  src="/atlantis-logo.svg"
+                  alt="Atlantis HMS Logo"
+                  width={150}
+                  height={40}
+                  priority
+                />
+              </Link>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="hidden md:block">
+              <SearchBar onFeatureSelect={handleFeatureSelect} />
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <Bell className="h-6 w-6 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
+              <div className="relative group">
+                <button 
+                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+                  aria-label="User menu"
+                >
+                  <User className="h-6 w-6" />
+                  <span className="font-medium">{mockPatient.firstName}</span>
+                </button>
+                
+                {/* User Dropdown */}
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                  <div className="py-1">
+                    <Link
+                      href="/patient/profile"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <Settings className="h-4 w-4 mr-3" />
+                      Manage profile
+                    </Link>
+                    <Link
+                      href="/patient/insurance-details"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <Shield className="h-4 w-4 mr-3" />
+                      Insurance Details
+                    </Link>
+                    <button
+                      onClick={() => dashboardLogger.logDashboardEvent('logout_intent_header')}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4 mr-3" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Appointment History</h1>
           <p className="text-gray-600">View and manage your past appointments and medical consultations</p>

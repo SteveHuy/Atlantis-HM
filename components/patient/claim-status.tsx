@@ -63,7 +63,6 @@ export function ClaimStatus() {
             
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-1 text-gray-600">
-                <DollarSign className="w-4 h-4" />
                 <span>${claim.amount.toFixed(2)}</span>
               </div>
               <span className="text-gray-500">
